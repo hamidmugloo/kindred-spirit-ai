@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeToggle } from './ThemeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +15,17 @@ import {
 
 interface HeaderProps {
   onNewChat?: () => void;
+  onOpenHistory?: () => void;
+  onOpenBreathing?: () => void;
+  onOpenMood?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNewChat }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  onNewChat, 
+  onOpenHistory, 
+  onOpenBreathing,
+  onOpenMood,
+}) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -44,9 +53,25 @@ export const Header: React.FC<HeaderProps> = ({ onNewChat }) => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-2">
           {user ? (
             <>
+              {onOpenHistory && (
+                <Button variant="ghost" size="icon" onClick={onOpenHistory} title="Conversation History">
+                  <History className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenBreathing && (
+                <Button variant="ghost" size="icon" onClick={onOpenBreathing} title="Breathing Exercise">
+                  <Wind className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenMood && (
+                <Button variant="ghost" size="icon" onClick={onOpenMood} title="Track Mood">
+                  <Smile className="w-5 h-5" />
+                </Button>
+              )}
+              <ThemeToggle />
               {onNewChat && (
                 <Button variant="calm" size="sm" onClick={onNewChat}>
                   <Plus className="w-4 h-4 mr-1" />
@@ -78,6 +103,7 @@ export const Header: React.FC<HeaderProps> = ({ onNewChat }) => {
             </>
           ) : (
             <>
+              <ThemeToggle />
               <Button variant="ghost" asChild>
                 <Link to="/auth">Sign In</Link>
               </Button>
@@ -89,14 +115,16 @@ export const Header: React.FC<HeaderProps> = ({ onNewChat }) => {
         </div>
 
         {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </Button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -110,6 +138,24 @@ export const Header: React.FC<HeaderProps> = ({ onNewChat }) => {
           <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
             {user ? (
               <>
+                {onOpenHistory && (
+                  <Button variant="ghost" onClick={() => { onOpenHistory(); setMobileMenuOpen(false); }}>
+                    <History className="w-4 h-4 mr-2" />
+                    Conversation History
+                  </Button>
+                )}
+                {onOpenBreathing && (
+                  <Button variant="ghost" onClick={() => { onOpenBreathing(); setMobileMenuOpen(false); }}>
+                    <Wind className="w-4 h-4 mr-2" />
+                    Breathing Exercise
+                  </Button>
+                )}
+                {onOpenMood && (
+                  <Button variant="ghost" onClick={() => { onOpenMood(); setMobileMenuOpen(false); }}>
+                    <Smile className="w-4 h-4 mr-2" />
+                    Track Mood
+                  </Button>
+                )}
                 {onNewChat && (
                   <Button variant="calm" onClick={() => { onNewChat(); setMobileMenuOpen(false); }}>
                     <Plus className="w-4 h-4 mr-2" />
