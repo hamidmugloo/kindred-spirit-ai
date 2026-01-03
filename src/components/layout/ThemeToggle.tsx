@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 
-export const ThemeToggle: React.FC = () => {
+export const ThemeToggle = forwardRef<HTMLButtonElement>((props, ref) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <Button
+      ref={ref}
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
       className="relative overflow-hidden"
+      {...props}
     >
       <motion.div
         key={theme}
@@ -29,4 +31,6 @@ export const ThemeToggle: React.FC = () => {
       </motion.div>
     </Button>
   );
-};
+});
+
+ThemeToggle.displayName = 'ThemeToggle';
