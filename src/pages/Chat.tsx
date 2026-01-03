@@ -1,12 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
+import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
+import { MoodTracker } from '@/components/mood/MoodTracker';
+import { BreathingExercise } from '@/components/breathing/BreathingExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
+import { useConversations } from '@/hooks/useConversations';
+import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
@@ -14,12 +19,32 @@ export default function Chat() {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
+  // UI State
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [moodOpen, setMoodOpen] = useState(false);
+  const [breathingOpen, setBreathingOpen] = useState(false);
+
   const {
     messages,
     isLoading,
     sendMessage,
     startNewConversation,
+    loadConversation,
+    currentConversation,
+    setCurrentConversation,
   } = useChat();
+
+  const {
+    conversations,
+    loadConversations,
+    deleteConversation,
+  } = useConversations();
+
+  const {
+    moodEntries,
+    todayMood,
+    logMood,
+  } = useMoodTracking();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -33,6 +58,31 @@ export default function Chat() {
 
   const handleStarterClick = (starter: string) => {
     sendMessage(starter);
+  };
+
+  const handleSelectConversation = async (conversationId: string) => {
+    const selected = conversations.find((c) => c.id === conversationId);
+    if (selected) {
+      setCurrentConversation({
+        id: selected.id,
+        title: selected.title,
+        createdAt: selected.createdAt,
+      });
+      await loadConversation(conversationId);
+    }
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    await deleteConversation(conversationId);
+    if (currentConversation?.id === conversationId) {
+      startNewConversation();
+    }
+    loadConversations();
+  };
+
+  const handleNewConversation = () => {
+    startNewConversation();
+    loadConversations();
   };
 
   if (authLoading) {
@@ -49,7 +99,41 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header onNewChat={startNewConversation} />
+      <Header 
+        onNewChat={handleNewConversation} 
+        onOpenHistory={() => {
+          loadConversations();
+          setSidebarOpen(true);
+        }}
+        onOpenBreathing={() => setBreathingOpen(true)}
+        onOpenMood={() => setMoodOpen(true)}
+      />
+
+      {/* Conversation Sidebar */}
+      <ConversationSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        conversations={conversations}
+        currentConversationId={currentConversation?.id}
+        onSelectConversation={handleSelectConversation}
+        onDeleteConversation={handleDeleteConversation}
+        onNewConversation={handleNewConversation}
+      />
+
+      {/* Mood Tracker */}
+      <MoodTracker
+        isOpen={moodOpen}
+        onClose={() => setMoodOpen(false)}
+        todayMood={todayMood}
+        moodEntries={moodEntries}
+        onLogMood={logMood}
+      />
+
+      {/* Breathing Exercise */}
+      <BreathingExercise
+        isOpen={breathingOpen}
+        onClose={() => setBreathingOpen(false)}
+      />
 
       <main className="flex-1 flex flex-col">
         {/* Messages Area */}
