@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp } from 'lucide-react';
+import { X, TrendingUp, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MOODS, MoodEntry } from '@/hooks/useMoodTracking';
 import { format } from 'date-fns';
-
+import { MoodInsightsChart } from './MoodInsightsChart';
 interface MoodTrackerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +23,7 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
 }) => {
   const [selectedMood, setSelectedMood] = useState<typeof MOODS[0] | null>(null);
   const [note, setNote] = useState('');
+  const [showInsights, setShowInsights] = useState(false);
 
   const handleSubmit = () => {
     if (!selectedMood) return;
@@ -131,29 +132,52 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
                 </>
               )}
 
-              {/* Stats */}
-              {last7Days.length > 0 && (
+              {/* Stats / Insights Toggle */}
+              {moodEntries.length > 0 && (
                 <div className="pt-4 border-t border-border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium text-foreground">Last 7 days</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {showInsights ? (
+                        <BarChart3 className="w-4 h-4 text-primary" />
+                      ) : (
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                      )}
+                      <span className="text-sm font-medium text-foreground">
+                        {showInsights ? 'Mood Insights' : 'Last 7 days'}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowInsights(!showInsights)}
+                      className="text-xs"
+                    >
+                      {showInsights ? 'Show Week' : 'Show Insights'}
+                    </Button>
                   </div>
-                  <div className="flex gap-1">
-                    {last7Days.reverse().map((entry) => (
-                      <div
-                        key={entry.id}
-                        className="flex-1 flex flex-col items-center gap-1"
-                      >
-                        <span className="text-lg">{entry.mood}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {format(entry.createdAt, 'EEE')}
-                        </span>
+                  
+                  {showInsights ? (
+                    <MoodInsightsChart moodEntries={moodEntries} />
+                  ) : (
+                    <>
+                      <div className="flex gap-1">
+                        {last7Days.reverse().map((entry) => (
+                          <div
+                            key={entry.id}
+                            className="flex-1 flex flex-col items-center gap-1"
+                          >
+                            <span className="text-lg">{entry.mood}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(entry.createdAt, 'EEE')}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3 text-center">
-                    Average mood: {averageMood.toFixed(1)} / 5
-                  </p>
+                      <p className="text-xs text-muted-foreground mt-3 text-center">
+                        Average mood: {averageMood.toFixed(1)} / 5
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </div>
