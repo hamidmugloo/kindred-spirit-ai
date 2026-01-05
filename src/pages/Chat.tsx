@@ -8,6 +8,7 @@ import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { MoodTracker } from '@/components/mood/MoodTracker';
 import { BreathingExercise } from '@/components/breathing/BreathingExercise';
+import { GroundingExercise } from '@/components/grounding/GroundingExercise';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
@@ -23,6 +24,7 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [moodOpen, setMoodOpen] = useState(false);
   const [breathingOpen, setBreathingOpen] = useState(false);
+  const [groundingOpen, setGroundingOpen] = useState(false);
 
   const {
     messages,
@@ -107,6 +109,7 @@ export default function Chat() {
         }}
         onOpenBreathing={() => setBreathingOpen(true)}
         onOpenMood={() => setMoodOpen(true)}
+        onOpenGrounding={() => setGroundingOpen(true)}
       />
 
       {/* Conversation Sidebar */}
@@ -133,6 +136,12 @@ export default function Chat() {
       <BreathingExercise
         isOpen={breathingOpen}
         onClose={() => setBreathingOpen(false)}
+      />
+
+      {/* Grounding Exercise */}
+      <GroundingExercise
+        isOpen={groundingOpen}
+        onClose={() => setGroundingOpen(false)}
       />
 
       <main className="flex-1 flex flex-col">

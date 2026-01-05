@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
@@ -18,6 +18,7 @@ interface HeaderProps {
   onOpenHistory?: () => void;
   onOpenBreathing?: () => void;
   onOpenMood?: () => void;
+  onOpenGrounding?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory, 
   onOpenBreathing,
   onOpenMood,
+  onOpenGrounding,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -69,6 +71,11 @@ export const Header: React.FC<HeaderProps> = ({
               {onOpenMood && (
                 <Button variant="ghost" size="icon" onClick={onOpenMood} title="Track Mood">
                   <Smile className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenGrounding && (
+                <Button variant="ghost" size="icon" onClick={onOpenGrounding} title="Grounding Exercise">
+                  <Target className="w-5 h-5" />
                 </Button>
               )}
               <ThemeToggle />
@@ -154,6 +161,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <Button variant="ghost" onClick={() => { onOpenMood(); setMobileMenuOpen(false); }}>
                     <Smile className="w-4 h-4 mr-2" />
                     Track Mood
+                  </Button>
+                )}
+                {onOpenGrounding && (
+                  <Button variant="ghost" onClick={() => { onOpenGrounding(); setMobileMenuOpen(false); }}>
+                    <Target className="w-4 h-4 mr-2" />
+                    Grounding Exercise
                   </Button>
                 )}
                 {onNewChat && (
