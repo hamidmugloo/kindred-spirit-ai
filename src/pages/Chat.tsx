@@ -100,7 +100,14 @@ export default function Chat() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex flex-col relative overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-sage/20 via-lavender/10 to-transparent rounded-full blur-3xl animate-pulse-soft" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-calm-blue/20 via-lavender/10 to-transparent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary/5 to-transparent rounded-full blur-3xl" />
+      </div>
+
       <Header 
         onNewChat={handleNewConversation} 
         onOpenHistory={() => {
@@ -144,14 +151,18 @@ export default function Chat() {
         onClose={() => setGroundingOpen(false)}
       />
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col relative z-10">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 py-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+          <div className="container mx-auto px-4 py-8 max-w-4xl">
             {messages.length === 0 ? (
               <WelcomeScreen onStarterClick={handleStarterClick} />
             ) : (
-              <div className="space-y-6">
+              <motion.div 
+                className="space-y-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
                 {messages.map((message, index) => (
                   <ChatMessage
                     key={message.id}
@@ -160,8 +171,8 @@ export default function Chat() {
                     isLatest={index === messages.length - 1 && message.role === 'assistant'}
                   />
                 ))}
-                <div ref={messagesEndRef} />
-              </div>
+                <div ref={messagesEndRef} className="h-4" />
+              </motion.div>
             )}
           </div>
         </div>
@@ -170,16 +181,16 @@ export default function Chat() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="sticky bottom-0 bg-background/80 backdrop-blur-lg border-t border-border"
+          className="sticky bottom-0 bg-gradient-to-t from-background via-background/95 to-background/80 backdrop-blur-xl border-t border-border/30 shadow-[0_-10px_40px_-10px_hsl(var(--primary)/0.1)]"
         >
-          <div className="container mx-auto px-4 py-4 max-w-3xl">
+          <div className="container mx-auto px-4 py-5 max-w-3xl">
             <ChatInput
               onSend={sendMessage}
               isLoading={isLoading}
               placeholder={
                 messages.length === 0
-                  ? "Share what's on your mind..."
-                  : 'Continue our conversation...'
+                  ? "Share what's on your mind... 💭"
+                  : 'Continue our conversation... ✨'
               }
             />
           </div>
