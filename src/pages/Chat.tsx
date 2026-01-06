@@ -9,6 +9,7 @@ import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { MoodTracker } from '@/components/mood/MoodTracker';
 import { BreathingExercise } from '@/components/breathing/BreathingExercise';
 import { GroundingExercise } from '@/components/grounding/GroundingExercise';
+import { MeditationTimer } from '@/components/wellness/MeditationTimer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
@@ -25,6 +26,7 @@ export default function Chat() {
   const [moodOpen, setMoodOpen] = useState(false);
   const [breathingOpen, setBreathingOpen] = useState(false);
   const [groundingOpen, setGroundingOpen] = useState(false);
+  const [meditationOpen, setMeditationOpen] = useState(false);
 
   const {
     messages,
@@ -117,6 +119,7 @@ export default function Chat() {
         onOpenBreathing={() => setBreathingOpen(true)}
         onOpenMood={() => setMoodOpen(true)}
         onOpenGrounding={() => setGroundingOpen(true)}
+        onOpenMeditation={() => setMeditationOpen(true)}
       />
 
       {/* Conversation Sidebar */}
@@ -149,6 +152,12 @@ export default function Chat() {
       <GroundingExercise
         isOpen={groundingOpen}
         onClose={() => setGroundingOpen(false)}
+      />
+
+      {/* Meditation Timer */}
+      <MeditationTimer
+        isOpen={meditationOpen}
+        onClose={() => setMeditationOpen(false)}
       />
 
       <main className="flex-1 flex flex-col relative z-10">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Shield, MessageCircle, Sparkles, Zap, ArrowRight } from 'lucide-react';
+import { DailyAffirmation } from '@/components/wellness/DailyAffirmation';
 
 const features = [
   {
@@ -96,6 +97,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
             Your compassionate companion for mental wellness. I'm here to listen,
             support, and help you navigate life's challenges. 🌟
           </p>
+        </motion.div>
+
+        {/* Daily Affirmation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-10 max-w-lg mx-auto w-full"
+        >
+          <DailyAffirmation />
         </motion.div>
 
         {/* Features Grid with glass cards */}
