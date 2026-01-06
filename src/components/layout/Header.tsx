@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
@@ -19,6 +19,7 @@ interface HeaderProps {
   onOpenBreathing?: () => void;
   onOpenMood?: () => void;
   onOpenGrounding?: () => void;
+  onOpenMeditation?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBreathing,
   onOpenMood,
   onOpenGrounding,
+  onOpenMeditation,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -76,6 +78,11 @@ export const Header: React.FC<HeaderProps> = ({
               {onOpenGrounding && (
                 <Button variant="ghost" size="icon" onClick={onOpenGrounding} title="Grounding Exercise">
                   <Target className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenMeditation && (
+                <Button variant="ghost" size="icon" onClick={onOpenMeditation} title="Meditation Timer">
+                  <Timer className="w-5 h-5" />
                 </Button>
               )}
               <ThemeToggle />
@@ -167,6 +174,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <Button variant="ghost" onClick={() => { onOpenGrounding(); setMobileMenuOpen(false); }}>
                     <Target className="w-4 h-4 mr-2" />
                     Grounding Exercise
+                  </Button>
+                )}
+                {onOpenMeditation && (
+                  <Button variant="ghost" onClick={() => { onOpenMeditation(); setMobileMenuOpen(false); }}>
+                    <Timer className="w-4 h-4 mr-2" />
+                    Meditation Timer
                   </Button>
                 )}
                 {onNewChat && (
