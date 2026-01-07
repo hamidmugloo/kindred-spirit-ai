@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer, BookOpen, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
@@ -20,6 +20,8 @@ interface HeaderProps {
   onOpenMood?: () => void;
   onOpenGrounding?: () => void;
   onOpenMeditation?: () => void;
+  onOpenJournal?: () => void;
+  onOpenWellnessReport?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -29,6 +31,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMood,
   onOpenGrounding,
   onOpenMeditation,
+  onOpenJournal,
+  onOpenWellnessReport,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -83,6 +87,16 @@ export const Header: React.FC<HeaderProps> = ({
               {onOpenMeditation && (
                 <Button variant="ghost" size="icon" onClick={onOpenMeditation} title="Meditation Timer">
                   <Timer className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenJournal && (
+                <Button variant="ghost" size="icon" onClick={onOpenJournal} title="Journal">
+                  <BookOpen className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenWellnessReport && (
+                <Button variant="ghost" size="icon" onClick={onOpenWellnessReport} title="Weekly Report">
+                  <BarChart3 className="w-5 h-5" />
                 </Button>
               )}
               <ThemeToggle />
@@ -180,6 +194,18 @@ export const Header: React.FC<HeaderProps> = ({
                   <Button variant="ghost" onClick={() => { onOpenMeditation(); setMobileMenuOpen(false); }}>
                     <Timer className="w-4 h-4 mr-2" />
                     Meditation Timer
+                  </Button>
+                )}
+                {onOpenJournal && (
+                  <Button variant="ghost" onClick={() => { onOpenJournal(); setMobileMenuOpen(false); }}>
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Journal
+                  </Button>
+                )}
+                {onOpenWellnessReport && (
+                  <Button variant="ghost" onClick={() => { onOpenWellnessReport(); setMobileMenuOpen(false); }}>
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Weekly Report
                   </Button>
                 )}
                 {onNewChat && (

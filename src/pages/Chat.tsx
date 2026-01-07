@@ -10,6 +10,8 @@ import { MoodTracker } from '@/components/mood/MoodTracker';
 import { BreathingExercise } from '@/components/breathing/BreathingExercise';
 import { GroundingExercise } from '@/components/grounding/GroundingExercise';
 import { MeditationTimer } from '@/components/wellness/MeditationTimer';
+import { JournalModal } from '@/components/journal/JournalModal';
+import { WeeklyWellnessReport } from '@/components/wellness/WeeklyWellnessReport';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
@@ -27,6 +29,8 @@ export default function Chat() {
   const [breathingOpen, setBreathingOpen] = useState(false);
   const [groundingOpen, setGroundingOpen] = useState(false);
   const [meditationOpen, setMeditationOpen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
+  const [wellnessReportOpen, setWellnessReportOpen] = useState(false);
 
   const {
     messages,
@@ -120,6 +124,8 @@ export default function Chat() {
         onOpenMood={() => setMoodOpen(true)}
         onOpenGrounding={() => setGroundingOpen(true)}
         onOpenMeditation={() => setMeditationOpen(true)}
+        onOpenJournal={() => setJournalOpen(true)}
+        onOpenWellnessReport={() => setWellnessReportOpen(true)}
       />
 
       {/* Conversation Sidebar */}
@@ -158,6 +164,18 @@ export default function Chat() {
       <MeditationTimer
         isOpen={meditationOpen}
         onClose={() => setMeditationOpen(false)}
+      />
+
+      {/* Journal Modal */}
+      <JournalModal
+        isOpen={journalOpen}
+        onClose={() => setJournalOpen(false)}
+      />
+
+      {/* Weekly Wellness Report */}
+      <WeeklyWellnessReport
+        isOpen={wellnessReportOpen}
+        onClose={() => setWellnessReportOpen(false)}
       />
 
       <main className="flex-1 flex flex-col relative z-10">
