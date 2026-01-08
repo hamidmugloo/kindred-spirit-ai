@@ -12,10 +12,14 @@ import { GroundingExercise } from '@/components/grounding/GroundingExercise';
 import { MeditationTimer } from '@/components/wellness/MeditationTimer';
 import { JournalModal } from '@/components/journal/JournalModal';
 import { WeeklyWellnessReport } from '@/components/wellness/WeeklyWellnessReport';
+import { AchievementsModal } from '@/components/achievements/AchievementsModal';
+import { GuidedMeditationModal } from '@/components/meditation/GuidedMeditationModal';
+import { WellnessGoalsModal } from '@/components/goals/WellnessGoalsModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
+import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
@@ -31,6 +35,9 @@ export default function Chat() {
   const [meditationOpen, setMeditationOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [wellnessReportOpen, setWellnessReportOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [guidedMeditationOpen, setGuidedMeditationOpen] = useState(false);
+  const [goalsOpen, setGoalsOpen] = useState(false);
 
   const {
     messages,
@@ -53,6 +60,21 @@ export default function Chat() {
     todayMood,
     logMood,
   } = useMoodTracking();
+
+  const {
+    streak,
+    achievements,
+    userAchievements,
+    updateStreak,
+    checkAndAwardAchievements,
+  } = useStreaksAndAchievements();
+
+  // Update streak on page load
+  useEffect(() => {
+    if (user) {
+      updateStreak();
+    }
+  }, [user, updateStreak]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -126,6 +148,10 @@ export default function Chat() {
         onOpenMeditation={() => setMeditationOpen(true)}
         onOpenJournal={() => setJournalOpen(true)}
         onOpenWellnessReport={() => setWellnessReportOpen(true)}
+        onOpenAchievements={() => setAchievementsOpen(true)}
+        onOpenGuidedMeditation={() => setGuidedMeditationOpen(true)}
+        onOpenGoals={() => setGoalsOpen(true)}
+        currentStreak={streak?.current_streak}
       />
 
       {/* Conversation Sidebar */}
@@ -176,6 +202,36 @@ export default function Chat() {
       <WeeklyWellnessReport
         isOpen={wellnessReportOpen}
         onClose={() => setWellnessReportOpen(false)}
+      />
+
+      {/* Achievements Modal */}
+      <AchievementsModal
+        isOpen={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
+        achievements={achievements}
+        userAchievements={userAchievements}
+        streak={streak}
+      />
+
+      {/* Guided Meditation Modal */}
+      <GuidedMeditationModal
+        isOpen={guidedMeditationOpen}
+        onClose={() => setGuidedMeditationOpen(false)}
+        onComplete={() => {
+          checkAndAwardAchievements({ meditation: 1 });
+        }}
+      />
+
+      {/* Wellness Goals Modal */}
+      <WellnessGoalsModal
+        isOpen={goalsOpen}
+        onClose={() => setGoalsOpen(false)}
+        onGoalCreated={() => {
+          checkAndAwardAchievements({ goals_created: 1 });
+        }}
+        onGoalCompleted={() => {
+          checkAndAwardAchievements({ goals_completed: 1 });
+        }}
       />
 
       <main className="flex-1 flex flex-col relative z-10">
