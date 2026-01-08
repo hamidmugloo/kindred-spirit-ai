@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer, BookOpen, BarChart3 } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer, BookOpen, BarChart3, Trophy, Volume2, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
@@ -22,6 +22,10 @@ interface HeaderProps {
   onOpenMeditation?: () => void;
   onOpenJournal?: () => void;
   onOpenWellnessReport?: () => void;
+  onOpenAchievements?: () => void;
+  onOpenGuidedMeditation?: () => void;
+  onOpenGoals?: () => void;
+  currentStreak?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -33,6 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMeditation,
   onOpenJournal,
   onOpenWellnessReport,
+  onOpenAchievements,
+  onOpenGuidedMeditation,
+  onOpenGoals,
+  currentStreak,
 }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -67,6 +75,26 @@ export const Header: React.FC<HeaderProps> = ({
               {onOpenHistory && (
                 <Button variant="ghost" size="icon" onClick={onOpenHistory} title="Conversation History">
                   <History className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenAchievements && (
+                <Button variant="ghost" size="icon" onClick={onOpenAchievements} title="Achievements" className="relative">
+                  <Trophy className="w-5 h-5" />
+                  {currentStreak !== undefined && currentStreak > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">
+                      {currentStreak > 99 ? '99+' : currentStreak}
+                    </span>
+                  )}
+                </Button>
+              )}
+              {onOpenGoals && (
+                <Button variant="ghost" size="icon" onClick={onOpenGoals} title="Wellness Goals">
+                  <Flag className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenGuidedMeditation && (
+                <Button variant="ghost" size="icon" onClick={onOpenGuidedMeditation} title="Guided Meditations">
+                  <Volume2 className="w-5 h-5" />
                 </Button>
               )}
               {onOpenBreathing && (
@@ -170,6 +198,24 @@ export const Header: React.FC<HeaderProps> = ({
                   <Button variant="ghost" onClick={() => { onOpenHistory(); setMobileMenuOpen(false); }}>
                     <History className="w-4 h-4 mr-2" />
                     Conversation History
+                  </Button>
+                )}
+                {onOpenAchievements && (
+                  <Button variant="ghost" onClick={() => { onOpenAchievements(); setMobileMenuOpen(false); }}>
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Achievements {currentStreak !== undefined && currentStreak > 0 && `🔥${currentStreak}`}
+                  </Button>
+                )}
+                {onOpenGoals && (
+                  <Button variant="ghost" onClick={() => { onOpenGoals(); setMobileMenuOpen(false); }}>
+                    <Flag className="w-4 h-4 mr-2" />
+                    Wellness Goals
+                  </Button>
+                )}
+                {onOpenGuidedMeditation && (
+                  <Button variant="ghost" onClick={() => { onOpenGuidedMeditation(); setMobileMenuOpen(false); }}>
+                    <Volume2 className="w-4 h-4 mr-2" />
+                    Guided Meditations
                   </Button>
                 )}
                 {onOpenBreathing && (
