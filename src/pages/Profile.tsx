@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Calendar, MessageCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, MessageCircle, ArrowLeft, Loader2, Download, FileJson, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useDataExport } from '@/hooks/useDataExport';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Stats {
   conversationCount: number;
@@ -17,6 +24,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats>({ conversationCount: 0, messageCount: 0 });
   const [loading, setLoading] = useState(true);
+  const { exportData, isExporting } = useDataExport();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -149,14 +157,54 @@ export default function Profile() {
             </div>
           </div>
 
+          {/* Data Export Card */}
+          <div className="bg-card rounded-2xl border border-border shadow-soft p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-2">
+              📦 Export Your Data
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Download all your conversations, journal entries, mood logs, and more.
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  className="w-full"
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Data
+                    </>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-48">
+                <DropdownMenuItem onClick={() => exportData('json')}>
+                  <FileJson className="w-4 h-4 mr-2" />
+                  Export as JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportData('csv')}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export as CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {/* Encouragement Card */}
           <div className="bg-gradient-to-br from-sage-light to-lavender-light rounded-2xl border border-border p-6 text-center">
             <p className="text-foreground font-medium mb-2">
-              Every conversation is a step forward
+              🌱 Every conversation is a step forward
             </p>
             <p className="text-sm text-muted-foreground">
               Thank you for trusting MindfulAI with your thoughts and feelings.
-              Remember, seeking support is a sign of strength.
+              Remember, seeking support is a sign of strength. 💪
             </p>
           </div>
         </motion.div>
