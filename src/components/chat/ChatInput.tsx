@@ -19,15 +19,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } = useVoiceInput();
+  const prevMessageRef = useRef('');
+  const { isListening, transcript, isSupported, startListening, stopListening } = useVoiceInput();
 
-  // Sync transcript to message
+  // Sync transcript to message when voice input is active
   useEffect(() => {
-    if (transcript) {
-      setMessage(prev => prev + transcript);
-      resetTranscript();
+    if (isListening && transcript) {
+      // Update message with the current transcript (appended to what was there before voice started)
+      setMessage(prevMessageRef.current + transcript);
     }
-  }, [transcript, resetTranscript]);
+  }, [transcript, isListening]);
+
+  // Store message before starting voice input
+  const handleToggleVoice = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      prevMessageRef.current = message;
+      startListening();
+    }
+  };
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -35,14 +46,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
     }
   }, [message]);
-
-  const toggleVoiceInput = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +98,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               type="button"
               size="icon"
               variant="ghost"
-              onClick={toggleVoiceInput}
+              onClick={handleToggleVoice}
               className={cn(
                 'h-10 w-10 rounded-xl transition-all duration-300 mb-0.5',
                 isListening 
