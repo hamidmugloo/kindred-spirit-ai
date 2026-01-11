@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Sparkles, MessageCircle } from 'lucide-react';
+import { Send, Loader2, Sparkles, MessageCircle, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -18,6 +19,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { isListening, transcript, isSupported, startListening, stopListening, resetTranscript } = useVoiceInput();
+
+  // Sync transcript to message
+  useEffect(() => {
+    if (transcript) {
+      setMessage(prev => prev + transcript);
+      resetTranscript();
+    }
+  }, [transcript, resetTranscript]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -25,6 +35,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
     }
   }, [message]);
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,10 +89,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none rounded-t-[28px]" />
         
         <div className="relative flex items-end gap-3 p-3">
-          {/* Input icon */}
-          <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-muted/50 mb-0.5">
-            <MessageCircle className="w-5 h-5 text-muted-foreground" />
-          </div>
+          {/* Voice input button */}
+          {isSupported && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={toggleVoiceInput}
+              className={cn(
+                'h-10 w-10 rounded-xl transition-all duration-300 mb-0.5',
+                isListening 
+                  ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30 animate-pulse' 
+                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+              )}
+            >
+              {isListening ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
+            </Button>
+          )}
 
           <textarea
             ref={textareaRef}
