@@ -15,12 +15,14 @@ interface ChatInputProps {
   onSend: (message: string) => void;
   isLoading: boolean;
   placeholder?: string;
+  onLanguageChange?: (language: string) => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   isLoading,
   placeholder = "Share what's on your mind... 💭",
+  onLanguageChange,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -124,7 +126,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 {SUPPORTED_LANGUAGES.map((lang) => (
                   <DropdownMenuItem
                     key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      onLanguageChange?.(lang.code);
+                    }}
                     className={cn(
                       'flex items-center gap-2 cursor-pointer',
                       currentLanguage === lang.code && 'bg-primary/10'
