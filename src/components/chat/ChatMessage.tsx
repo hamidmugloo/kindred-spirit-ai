@@ -1,15 +1,26 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Sparkles, Heart, Bot } from 'lucide-react';
+import { User, Sparkles, Heart, Bot, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
   isLatest?: boolean;
+  onSpeak?: (text: string) => void;
+  onStopSpeaking?: () => void;
+  isSpeaking?: boolean;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ role, content, isLatest }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ 
+  role, 
+  content, 
+  isLatest,
+  onSpeak,
+  onStopSpeaking,
+  isSpeaking,
+}) => {
   const isUser = role === 'user';
 
   return (
@@ -90,7 +101,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ role, content, isLates
           
           {/* Message label */}
           <div className={cn(
-            'text-[10px] uppercase tracking-widest font-semibold mb-2.5 flex items-center gap-1.5',
+            'text-[10px] uppercase tracking-widest font-semibold mb-2.5 flex items-center gap-1.5 justify-between',
             isUser ? 'text-primary-foreground/80' : 'text-muted-foreground'
           )}>
             {isUser ? (
@@ -104,6 +115,28 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ role, content, isLates
                 MindfulAI
                 <Sparkles className="w-3 h-3 text-lavender" />
               </span>
+            )}
+            
+            {/* TTS button for assistant messages */}
+            {!isUser && content && onSpeak && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => isSpeaking ? onStopSpeaking?.() : onSpeak(content)}
+                className={cn(
+                  'h-6 w-6 p-0 rounded-full transition-all',
+                  isSpeaking 
+                    ? 'text-primary bg-primary/10 hover:bg-primary/20' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                )}
+              >
+                {isSpeaking ? (
+                  <VolumeX className="w-3.5 h-3.5" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5" />
+                )}
+              </Button>
             )}
           </div>
 
