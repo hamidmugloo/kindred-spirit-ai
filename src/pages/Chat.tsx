@@ -20,7 +20,6 @@ import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
@@ -39,19 +38,6 @@ export default function Chat() {
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [guidedMeditationOpen, setGuidedMeditationOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
-  const [voiceLanguage, setVoiceLanguage] = useState('en-US');
-
-  const {
-    isSpeaking,
-    speak,
-    stop: stopSpeaking,
-    setLanguage: setTTSLanguage,
-  } = useTextToSpeech({ language: voiceLanguage });
-
-  const handleLanguageChange = (lang: string) => {
-    setVoiceLanguage(lang);
-    setTTSLanguage(lang);
-  };
 
   const {
     messages,
@@ -266,9 +252,6 @@ export default function Chat() {
                     role={message.role}
                     content={message.content}
                     isLatest={index === messages.length - 1 && message.role === 'assistant'}
-                    onSpeak={speak}
-                    onStopSpeaking={stopSpeaking}
-                    isSpeaking={isSpeaking}
                   />
                 ))}
                 <div ref={messagesEndRef} className="h-4" />
@@ -292,7 +275,6 @@ export default function Chat() {
                   ? "Share what's on your mind... 💭"
                   : 'Continue our conversation... ✨'
               }
-              onLanguageChange={handleLanguageChange}
             />
           </div>
         </motion.div>
