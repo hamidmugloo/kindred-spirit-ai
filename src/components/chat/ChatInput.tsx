@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Sparkles, Mic, MicOff, Globe } from 'lucide-react';
+import { Send, Loader2, Sparkles, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useVoiceInput, SUPPORTED_LANGUAGES } from '@/hooks/useVoiceInput';
@@ -79,19 +78,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  const canSend = message.trim() && !isLoading;
+
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <motion.div 
-        animate={{ 
-          boxShadow: isFocused 
-            ? '0 0 40px -5px hsl(158 35% 45% / 0.25), 0 0 20px -10px hsl(var(--primary) / 0.2)' 
-            : '0 8px 30px -8px hsl(220 15% 20% / 0.1)'
-        }}
+      <div 
         className={cn(
-          'relative bg-gradient-to-br from-card via-card to-muted/30 border-2 rounded-[28px] overflow-hidden transition-all duration-500',
+          'relative bg-gradient-to-br from-card via-card to-muted/30 border-2 rounded-[28px] overflow-hidden transition-all duration-300',
           isFocused 
-            ? 'border-primary/50 ring-4 ring-primary/10' 
-            : 'border-border/60 hover:border-border'
+            ? 'border-primary/50 ring-4 ring-primary/10 shadow-[0_0_40px_-5px_hsl(158_35%_45%/0.25),0_0_20px_-10px_hsl(var(--primary)/0.2)]' 
+            : 'border-border/60 hover:border-border shadow-[0_8px_30px_-8px_hsl(220_15%_20%/0.1)]'
         )}
       >
         {/* Animated gradient border effect */}
@@ -184,50 +180,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             )}
           />
           
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isLoading ? 'loading' : message.trim() ? 'ready' : 'empty'}
-              initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
-              animate={{ scale: 1, opacity: 1, rotate: 0 }}
-              exit={{ scale: 0.8, opacity: 0, rotate: 10 }}
-              transition={{ duration: 0.2, type: 'spring', stiffness: 300 }}
-            >
-              <Button
-                type="submit"
-                size="icon"
-                disabled={!message.trim() || isLoading}
-                className={cn(
-                  'h-12 w-12 rounded-2xl transition-all duration-300 relative overflow-hidden flex-shrink-0',
-                  message.trim() && !isLoading 
-                    ? 'bg-gradient-to-br from-primary via-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105' 
-                    : 'bg-muted/80'
-                )}
-              >
-                {/* Button shimmer effect */}
-                {message.trim() && !isLoading && (
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-                  />
-                )}
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5 relative z-10" />
-                )}
-              </Button>
-            </motion.div>
-          </AnimatePresence>
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!canSend}
+            className={cn(
+              'h-12 w-12 rounded-2xl transition-all duration-300 relative overflow-hidden flex-shrink-0',
+              canSend 
+                ? 'bg-gradient-to-br from-primary via-primary to-primary/80 hover:from-primary/90 hover:to-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105' 
+                : 'bg-muted/80'
+            )}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5 relative z-10" />
+            )}
+          </Button>
         </div>
-      </motion.div>
+      </div>
       
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="flex items-center justify-center gap-3 mt-4"
-      >
+      <div className="flex items-center justify-center gap-3 mt-4">
         <div className="flex items-center gap-1.5 flex-wrap justify-center">
           <Sparkles className="w-3 h-3 text-sage" />
           <p className="text-xs text-muted-foreground/80">
@@ -239,7 +212,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </p>
           <Sparkles className="w-3 h-3 text-lavender" />
         </div>
-      </motion.div>
+      </div>
     </form>
   );
 };
