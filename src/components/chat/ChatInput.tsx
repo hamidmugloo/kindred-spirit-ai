@@ -1,60 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, Mic, MicOff } from 'lucide-react';
+import { Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useVoiceInput, SUPPORTED_LANGUAGES } from '@/hooks/useVoiceInput';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   isLoading: boolean;
   placeholder?: string;
-  onLanguageChange?: (language: string) => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   isLoading,
   placeholder = "Share what's on your mind... 💭",
-  onLanguageChange,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const prevMessageRef = useRef('');
-  const { 
-    isListening, 
-    transcript, 
-    isSupported, 
-    startListening, 
-    stopListening,
-    setLanguage,
-    currentLanguage,
-  } = useVoiceInput();
-
-  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
-
-  // Sync transcript to message when voice input is active
-  useEffect(() => {
-    if (isListening && transcript) {
-      setMessage(prevMessageRef.current + transcript);
-    }
-  }, [transcript, isListening]);
-
-  // Store message before starting voice input
-  const handleToggleVoice = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      prevMessageRef.current = message;
-      startListening();
-    }
-  };
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -105,65 +67,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/5 to-transparent pointer-events-none rounded-t-[28px]" />
         
         <div className="relative flex items-end gap-2 p-3">
-          {/* Language selector */}
-          {isSupported && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="h-10 w-10 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted mb-0.5 flex-shrink-0"
-                >
-                  <span className="text-lg">{currentLang.flag}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      onLanguageChange?.(lang.code);
-                    }}
-                    className={cn(
-                      'flex items-center gap-2 cursor-pointer',
-                      currentLanguage === lang.code && 'bg-primary/10'
-                    )}
-                  >
-                    <span className="text-lg">{lang.flag}</span>
-                    <span>{lang.name}</span>
-                    {currentLanguage === lang.code && (
-                      <span className="ml-auto text-primary">✓</span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          {/* Voice input button */}
-          {isSupported && (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              onClick={handleToggleVoice}
-              className={cn(
-                'h-10 w-10 rounded-xl transition-all duration-300 mb-0.5 flex-shrink-0',
-                isListening 
-                  ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30 animate-pulse' 
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-              )}
-            >
-              {isListening ? (
-                <MicOff className="w-5 h-5" />
-              ) : (
-                <Mic className="w-5 h-5" />
-              )}
-            </Button>
-          )}
-
           <textarea
             ref={textareaRef}
             value={message}
@@ -205,10 +108,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <Sparkles className="w-3 h-3 text-sage" />
           <p className="text-xs text-muted-foreground/80">
             Press <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono mx-1">Enter</kbd> to send
-          </p>
-          <span className="text-muted-foreground/40">•</span>
-          <p className="text-xs text-muted-foreground/80">
-            🎤 {currentLang.name}
           </p>
           <Sparkles className="w-3 h-3 text-lavender" />
         </div>
