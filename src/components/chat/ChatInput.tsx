@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,18 +18,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
-    }
-  }, [message]);
+  const autosize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+
+    // Avoid layout thrash by doing it in the next frame
+    requestAnimationFrame(() => {
+      el.style.height = '0px';
+      el.style.height = `${Math.min(el.scrollHeight, 150)}px`;
+    });
+  }, []);
+
+  const handleChange = (value: string) => {
+    setMessage(value);
+    autosize();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
       onSend(message.trim());
       setMessage('');
+      autosize();
     }
   };
 
@@ -70,16 +80,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <textarea
             ref={textareaRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
+            onFocus={() => {
+              setIsFocused(true);
+              autosize();
+            }}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
             rows={1}
             disabled={isLoading}
             className={cn(
-              'flex-1 resize-none bg-transparent px-3 py-3 text-foreground placeholder:text-muted-foreground/70 focus:outline-none text-sm leading-relaxed',
-              'min-h-[48px] max-h-[150px]'
+              'flex-1 resize-none bg-transparent px-3 py-3 text-foreground caret-primary placeholder:text-muted-foreground/70 focus:outline-none text-sm leading-relaxed',
+              'min-h-[48px] max-h-[150px] relative z-10'
             )}
           />
           
