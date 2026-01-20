@@ -1,7 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Send, Loader2, Sparkles } from 'lucide-react';
+import { Send, Loader2, Sparkles, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -14,6 +15,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isLoading,
   placeholder = "Share what's on your mind... 💭",
 }) => {
+  const { isListening, isSupported, startListening, stopListening } = useVoiceInput();
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -47,6 +49,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
+    }
+  };
+
+  const toggleVoice = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening((transcript) => {
+        setMessage(transcript);
+        autosize();
+      });
     }
   };
 
@@ -96,6 +109,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             )}
           />
           
+          {isSupported && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={toggleVoice}
+              disabled={isLoading}
+              className={cn(
+                'h-10 w-10 rounded-xl flex-shrink-0 transition-all duration-200',
+                isListening 
+                  ? 'bg-destructive/20 text-destructive hover:bg-destructive/30 animate-pulse' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              )}
+            >
+              {isListening ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
+            </Button>
+          )}
+          
           <Button
             type="submit"
             size="icon"
@@ -121,6 +156,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <Sparkles className="w-3 h-3 text-sage" />
           <p className="text-xs text-muted-foreground/80">
             Press <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono mx-1">Enter</kbd> to send
+            {isSupported && ' • Tap mic for voice'}
           </p>
           <Sparkles className="w-3 h-3 text-lavender" />
         </div>
