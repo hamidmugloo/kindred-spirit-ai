@@ -15,6 +15,7 @@ import { WeeklyWellnessReport } from '@/components/wellness/WeeklyWellnessReport
 import { AchievementsModal } from '@/components/achievements/AchievementsModal';
 import { GuidedMeditationModal } from '@/components/meditation/GuidedMeditationModal';
 import { WellnessGoalsModal } from '@/components/goals/WellnessGoalsModal';
+import { MemoryManagementModal } from '@/components/memory/MemoryManagementModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
@@ -38,6 +39,7 @@ export default function Chat() {
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [guidedMeditationOpen, setGuidedMeditationOpen] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
 
   const {
     messages,
@@ -151,6 +153,7 @@ export default function Chat() {
         onOpenAchievements={() => setAchievementsOpen(true)}
         onOpenGuidedMeditation={() => setGuidedMeditationOpen(true)}
         onOpenGoals={() => setGoalsOpen(true)}
+        onOpenMemory={() => setMemoryOpen(true)}
         currentStreak={streak?.current_streak}
       />
 
@@ -232,6 +235,12 @@ export default function Chat() {
         onGoalCompleted={() => {
           checkAndAwardAchievements({ goals_completed: 1 });
         }}
+      />
+
+      {/* Memory Management Modal */}
+      <MemoryManagementModal
+        isOpen={memoryOpen}
+        onClose={() => setMemoryOpen(false)}
       />
 
       <main className="flex-1 flex flex-col relative z-10">
