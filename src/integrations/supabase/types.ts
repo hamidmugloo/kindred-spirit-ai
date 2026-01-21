@@ -225,6 +225,36 @@ export type Database = {
           },
         ]
       }
+      user_memories: {
+        Row: {
+          created_at: string
+          id: string
+          memory_key: string
+          memory_type: string
+          memory_value: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memory_key: string
+          memory_type: string
+          memory_value: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memory_key?: string
+          memory_type?: string
+          memory_value?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_streaks: {
         Row: {
           created_at: string
