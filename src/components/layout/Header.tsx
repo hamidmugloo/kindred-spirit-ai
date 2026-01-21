@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer, BookOpen, BarChart3, Trophy, Volume2, Flag } from 'lucide-react';
+import { Sparkles, LogOut, User, Menu, X, Plus, History, Wind, Smile, Target, Timer, BookOpen, BarChart3, Trophy, Volume2, Flag, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
@@ -25,6 +25,7 @@ interface HeaderProps {
   onOpenAchievements?: () => void;
   onOpenGuidedMeditation?: () => void;
   onOpenGoals?: () => void;
+  onOpenMemory?: () => void;
   currentStreak?: number;
 }
 
@@ -40,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAchievements,
   onOpenGuidedMeditation,
   onOpenGoals,
+  onOpenMemory,
   currentStreak,
 }) => {
   const { user, signOut } = useAuth();
@@ -125,6 +127,11 @@ export const Header: React.FC<HeaderProps> = ({
               {onOpenWellnessReport && (
                 <Button variant="ghost" size="icon" onClick={onOpenWellnessReport} title="Weekly Report">
                   <BarChart3 className="w-5 h-5" />
+                </Button>
+              )}
+              {onOpenMemory && (
+                <Button variant="ghost" size="icon" onClick={onOpenMemory} title="Memory & Preferences">
+                  <Brain className="w-5 h-5" />
                 </Button>
               )}
               <ThemeToggle />
@@ -252,6 +259,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <Button variant="ghost" onClick={() => { onOpenWellnessReport(); setMobileMenuOpen(false); }}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Weekly Report
+                  </Button>
+                )}
+                {onOpenMemory && (
+                  <Button variant="ghost" onClick={() => { onOpenMemory(); setMobileMenuOpen(false); }}>
+                    <Brain className="w-4 h-4 mr-2" />
+                    Memory & Preferences
                   </Button>
                 )}
                 {onNewChat && (

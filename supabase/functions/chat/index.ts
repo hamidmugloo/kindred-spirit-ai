@@ -174,10 +174,13 @@ serve(async (req) => {
     
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
-      // Try to get user from the anon key request
-      const userClient = createClient(SUPABASE_URL!, token);
-      const { data: { user } } = await userClient.auth.getUser();
+      // Verify the JWT token using Supabase auth
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError) {
+        console.error("Auth error:", authError);
+      }
       userId = user?.id || null;
+      console.log("User ID from auth:", userId ? userId.slice(0, 8) + "..." : "null");
     }
 
     // Fetch user memories if authenticated
