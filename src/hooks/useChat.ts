@@ -131,11 +131,15 @@ export const useChat = () => {
     }));
     
     try {
+      // Get current session token for memory access
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+      
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: authToken ? `Bearer ${authToken}` : `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: [{ role: 'user', content }],
