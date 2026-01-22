@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `You are MindfulAI, a general-purpose AI assistant with a mindful personality.
+const SYSTEM_PROMPT = `You are ORBIT, a general-purpose AI assistant with a mindful personality.
 
 RESPONSE RULES:
 

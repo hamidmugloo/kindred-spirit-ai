@@ -108,7 +108,7 @@ export default function Profile() {
               <h1 className="text-2xl font-bold text-foreground mt-4">
                 {user.user_metadata?.display_name || 'Friend'}
               </h1>
-              <p className="text-muted-foreground">MindfulAI Member</p>
+              <p className="text-muted-foreground">ORBIT Member</p>
             </div>
 
             <div className="p-6 space-y-4">
@@ -203,7 +203,7 @@ export default function Profile() {
               🌱 Every conversation is a step forward
             </p>
             <p className="text-sm text-muted-foreground">
-              Thank you for trusting MindfulAI with your thoughts and feelings.
+              Thank you for trusting ORBIT with your thoughts and feelings.
               Remember, seeking support is a sign of strength. 💪
             </p>
           </div>

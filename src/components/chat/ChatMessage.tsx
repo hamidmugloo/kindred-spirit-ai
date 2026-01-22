@@ -105,7 +105,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             ) : (
               <span className="flex items-center gap-1.5">
                 <Heart className="w-3 h-3 text-sage" />
-                MindfulAI
+                ORBIT
                 <Sparkles className="w-3 h-3 text-lavender" />
               </span>
             )}

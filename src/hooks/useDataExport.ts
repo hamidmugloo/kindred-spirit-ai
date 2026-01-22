@@ -75,7 +75,7 @@ export const useDataExport = () => {
         blob = new Blob([JSON.stringify(exportData, null, 2)], {
           type: 'application/json',
         });
-        filename = `mindfulai-export-${new Date().toISOString().split('T')[0]}.json`;
+        filename = `orbit-export-${new Date().toISOString().split('T')[0]}.json`;
       } else {
         // Convert to CSV format
         const csvSections: string[] = [];
@@ -90,7 +90,7 @@ export const useDataExport = () => {
           return `\n--- ${title} ---\n${headers.join(',')}\n${rows.join('\n')}`;
         };
 
-        csvSections.push(`MindfulAI Data Export - ${exportData.exportedAt}`);
+        csvSections.push(`ORBIT Data Export - ${exportData.exportedAt}`);
         csvSections.push(`User Email: ${exportData.user.email}`);
         csvSections.push(`Member Since: ${exportData.user.memberSince}`);
         csvSections.push(arrayToCSV(exportData.conversations, 'Conversations'));
@@ -101,7 +101,7 @@ export const useDataExport = () => {
         csvSections.push(arrayToCSV(exportData.streaks, 'Streaks'));
 
         blob = new Blob([csvSections.join('\n')], { type: 'text/csv' });
-        filename = `mindfulai-export-${new Date().toISOString().split('T')[0]}.csv`;
+        filename = `orbit-export-${new Date().toISOString().split('T')[0]}.csv`;
       }
 
       // Download file
