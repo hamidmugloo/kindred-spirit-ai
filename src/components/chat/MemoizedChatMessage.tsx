@@ -76,7 +76,7 @@ const MemoizedChatMessage = memo<MemoizedChatMessageProps>(({
             ) : (
               <span className="flex items-center gap-1">
                 <Heart className="w-3 h-3 text-sage" />
-                MindfulAI
+                ORBIT
                 <Sparkles className="w-3 h-3 text-lavender" />
               </span>
             )}

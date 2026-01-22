@@ -168,7 +168,7 @@ export function WeeklyWellnessReport({ isOpen, onClose }: WeeklyWellnessReportPr
     } else if (stats.journalEntries > 3) {
       return "📝 You've been journaling consistently! Writing helps process emotions and build self-awareness.";
     } else if (stats.totalConversations > 0) {
-      return "💬 You've been actively using MindfulAI. Talking through your feelings is a healthy practice.";
+      return "💬 You've been actively using ORBIT. Talking through your feelings is a healthy practice.";
     }
     return "✨ Start tracking your mood and journaling to get personalized insights!";
   };

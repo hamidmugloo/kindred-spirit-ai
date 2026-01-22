@@ -62,11 +62,9 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sage to-calm-blue flex items-center justify-center group-hover:shadow-glow transition-shadow duration-300">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src="/orbit-logo.png" alt="ORBIT" className="h-9 w-auto" />
           <span className="text-lg font-semibold text-foreground">
-            MindfulAI
+            ORBIT
           </span>
         </Link>
 

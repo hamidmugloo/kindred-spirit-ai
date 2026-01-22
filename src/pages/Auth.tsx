@@ -78,7 +78,7 @@ export default function Auth() {
           }
           return;
         }
-        toast.success('Welcome to MindfulAI! Your journey begins now.');
+        toast.success('Welcome to ORBIT! Your journey begins now.');
         navigate('/chat');
       } else {
         const { error } = await signIn(email, password);
@@ -243,7 +243,7 @@ export default function Auth() {
           transition={{ delay: 0.5 }}
           className="text-xs text-muted-foreground text-center mt-6 px-4"
         >
-          Your data is encrypted and secure. MindfulAI prioritizes your privacy.
+          Your data is encrypted and secure. ORBIT prioritizes your privacy.
         </motion.p>
       </motion.div>
     </div>

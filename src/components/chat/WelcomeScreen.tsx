@@ -91,7 +91,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
         >
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
             Welcome to{' '}
-            <span className="text-gradient bg-gradient-to-r from-sage via-lavender to-calm-blue bg-clip-text text-transparent">MindfulAI</span>
+            <span className="text-gradient bg-gradient-to-r from-sage via-lavender to-calm-blue bg-clip-text text-transparent">ORBIT</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
             Your compassionate companion for mental wellness. I'm here to listen,
@@ -184,7 +184,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
       >
         <div className="bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border/30">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong className="text-foreground/80">Important:</strong> MindfulAI is a supportive companion, not a
+            <strong className="text-foreground/80">Important:</strong> ORBIT is a supportive companion, not a
             replacement for professional mental health care. If you're in crisis,
             please reach out to a crisis helpline:{' '}
             <span className="text-primary font-semibold">988</span> (US) or your

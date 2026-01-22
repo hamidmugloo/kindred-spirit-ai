@@ -132,7 +132,7 @@ export const MemoryManagementModal: React.FC<MemoryManagementModalProps> = ({
             Memory & Preferences
           </DialogTitle>
           <DialogDescription>
-            MindfulAI remembers these details to personalize your experience. You can delete any item at any time.
+            ORBIT remembers these details to personalize your experience. You can delete any item at any time.
           </DialogDescription>
         </DialogHeader>
 
@@ -146,7 +146,7 @@ export const MemoryManagementModal: React.FC<MemoryManagementModalProps> = ({
               <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="text-sm">No memories stored yet.</p>
               <p className="text-xs mt-1">
-                Share your name, interests, or goals and MindfulAI will remember them.
+                Share your name, interests, or goals and ORBIT will remember them.
               </p>
             </div>
           ) : (

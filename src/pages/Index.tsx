@@ -35,7 +35,7 @@ const features = [
 
 const testimonials = [
   {
-    quote: "MindfulAI helped me through some of my darkest moments. It's like having a caring friend who truly listens.",
+    quote: "ORBIT helped me through some of my darkest moments. It's like having a caring friend who truly listens.",
     author: 'A grateful user',
   },
   {
@@ -102,7 +102,7 @@ export default function Index() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              MindfulAI is your compassionate AI companion, offering empathetic
+              ORBIT is your compassionate AI companion, offering empathetic
               support, understanding, and gentle guidance whenever you need
               someone to talk to.
             </p>
@@ -281,17 +281,15 @@ export default function Index() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sage to-calm-blue flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-semibold text-foreground">MindfulAI</span>
+              <img src="/orbit-logo.png" alt="ORBIT" className="h-8 w-auto" />
+              <span className="font-semibold text-foreground">ORBIT</span>
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              MindfulAI is a supportive companion, not a replacement for
+              ORBIT is a supportive companion, not a replacement for
               professional mental health care.
             </p>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} MindfulAI
+              © {new Date().getFullYear()} ORBIT
             </p>
           </div>
         </div>
