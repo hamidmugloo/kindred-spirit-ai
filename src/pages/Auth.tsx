@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import orbitLogo from '@/assets/orbit-logo.png';
+import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -35,6 +36,7 @@ export default function Auth() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -413,9 +415,20 @@ export default function Auth() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground font-medium">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-foreground font-medium">
+                    Password
+                  </Label>
+                  {!isSignUp && (
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPasswordOpen(true)}
+                      className="text-xs text-primary hover:underline underline-offset-2 font-medium"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
                 <div className="relative group">
                   <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${focusedField === 'password' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <Input
@@ -499,6 +512,12 @@ export default function Auth() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 }
