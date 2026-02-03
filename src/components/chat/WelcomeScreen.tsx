@@ -1,44 +1,44 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Shield, MessageCircle, Sparkles, Zap, ArrowRight } from 'lucide-react';
-import { DailyAffirmation } from '@/components/wellness/DailyAffirmation';
+import { Brain, Shield, Zap, Sparkles, ArrowRight, Code, Lightbulb, MessageSquare } from 'lucide-react';
+import orbitLogo from '@/assets/orbit-logo.png';
 
 const features = [
   {
-    icon: Heart,
-    title: 'Empathetic Support 💜',
-    description: 'I listen without judgment and respond with genuine care and understanding.',
-    gradient: 'from-rose-500/20 to-pink-500/10',
-    iconColor: 'text-rose-500',
+    icon: Brain,
+    title: 'Smart & Capable 🧠',
+    description: 'I can help with questions, analysis, writing, coding, and creative tasks.',
+    gradient: 'from-violet-500/20 to-purple-500/10',
+    iconColor: 'text-violet-500',
   },
   {
     icon: Shield,
-    title: 'Safe Space 🛡️',
-    description: 'Your conversations are private. This is your sanctuary to express freely.',
+    title: 'Private & Secure 🛡️',
+    description: 'Your conversations are protected. Chat freely without worry.',
     gradient: 'from-emerald-500/20 to-teal-500/10',
     iconColor: 'text-emerald-500',
   },
   {
-    icon: MessageCircle,
-    title: 'Always Available 🌙',
-    description: "I'm here whenever you need to talk, day or night, no appointments needed.",
-    gradient: 'from-blue-500/20 to-cyan-500/10',
-    iconColor: 'text-blue-500',
+    icon: Zap,
+    title: 'Fast Responses ⚡',
+    description: 'Get instant, thoughtful answers to any question you have.',
+    gradient: 'from-amber-500/20 to-orange-500/10',
+    iconColor: 'text-amber-500',
   },
   {
-    icon: Sparkles,
-    title: 'Personalized Care ✨',
-    description: 'I adapt to your unique needs and remember our conversations for better support.',
-    gradient: 'from-violet-500/20 to-purple-500/10',
-    iconColor: 'text-violet-500',
+    icon: Lightbulb,
+    title: 'Always Learning ✨',
+    description: 'I adapt to your needs and remember our conversations for better help.',
+    gradient: 'from-blue-500/20 to-cyan-500/10',
+    iconColor: 'text-blue-500',
   },
 ];
 
 const starters = [
-  { text: "I'm feeling overwhelmed today...", emoji: '😔' },
-  { text: 'I need help processing my thoughts', emoji: '💭' },
-  { text: "I'm struggling with anxiety", emoji: '😰' },
-  { text: 'Can we talk about stress management?', emoji: '🧘' },
+  { text: 'Explain a complex topic to me', emoji: '📚' },
+  { text: 'Help me write a professional email', emoji: '✉️' },
+  { text: 'Can you help me debug some code?', emoji: '💻' },
+  { text: 'I need help brainstorming ideas', emoji: '💡' },
 ];
 
 interface WelcomeScreenProps {
@@ -73,14 +73,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
             transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
           />
           
-          {/* Main avatar */}
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-sage via-lavender to-calm-blue flex items-center justify-center shadow-2xl shadow-primary/20 border-2 border-white/20">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-            >
-              <Sparkles className="w-12 h-12 text-primary-foreground" />
-            </motion.div>
+          {/* Main avatar with logo */}
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-sage via-lavender to-calm-blue flex items-center justify-center shadow-2xl shadow-primary/20 border-2 border-white/20 p-4">
+            <img src={orbitLogo} alt="ORBIT" className="w-full h-full object-contain" />
           </div>
         </motion.div>
 
@@ -90,23 +85,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
           transition={{ delay: 0.3 }}
         >
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
-            Welcome to{' '}
+            Hi, I'm{' '}
             <span className="text-gradient bg-gradient-to-r from-sage via-lavender to-calm-blue bg-clip-text text-transparent">ORBIT</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl mb-10 leading-relaxed max-w-xl mx-auto">
-            Your compassionate companion for mental wellness. I'm here to listen,
-            support, and help you navigate life's challenges. 🌟
+            Your intelligent AI assistant. Ask me anything—I'm here to help you 
+            think, create, and solve problems. 🚀
           </p>
-        </motion.div>
-
-        {/* Daily Affirmation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="mb-10 max-w-lg mx-auto w-full"
-        >
-          <DailyAffirmation />
         </motion.div>
 
         {/* Features Grid with glass cards */}
@@ -149,9 +134,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
           className="space-y-4"
         >
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Zap className="w-4 h-4 text-amber-500" />
+            <MessageSquare className="w-4 h-4 text-primary" />
             <p className="text-sm font-medium text-muted-foreground">
-              Quick conversation starters
+              Try asking me something
             </p>
           </div>
           <div className="flex flex-wrap gap-3 justify-center">
@@ -173,24 +158,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStarterClick }) 
             ))}
           </div>
         </motion.div>
-      </motion.div>
-
-      {/* Safety Disclaimer */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1 }}
-        className="mt-12 text-center max-w-xl"
-      >
-        <div className="bg-gradient-to-br from-muted/50 to-muted/30 backdrop-blur-sm rounded-2xl px-6 py-4 border border-border/30">
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong className="text-foreground/80">Important:</strong> ORBIT is a supportive companion, not a
-            replacement for professional mental health care. If you're in crisis,
-            please reach out to a crisis helpline:{' '}
-            <span className="text-primary font-semibold">988</span> (US) or your
-            local emergency services. 💙
-          </p>
-        </div>
       </motion.div>
     </div>
   );

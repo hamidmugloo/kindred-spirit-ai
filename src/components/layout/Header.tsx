@@ -61,9 +61,9 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <img src="/orbit-logo.png" alt="ORBIT" className="h-9 w-auto" />
-          <span className="text-lg font-semibold text-foreground">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img src="/orbit-logo.png" alt="ORBIT" className="h-10 w-auto" />
+          <span className="text-xl font-bold text-foreground tracking-tight">
             ORBIT
           </span>
         </Link>

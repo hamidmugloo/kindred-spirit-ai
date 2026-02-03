@@ -197,15 +197,15 @@ export default function Auth() {
             </motion.div>
 
             <h1 className="text-4xl font-bold mb-4">
-              Your Mental Wellness Journey
+              Your Intelligent AI Assistant
             </h1>
             <p className="text-lg text-white/80 mb-8 leading-relaxed">
-              ORBIT is your compassionate AI companion, here to support you through life's ups and downs with empathy and understanding.
+              ORBIT helps you answer questions, solve problems, write content, and tackle any challenge—instantly and intelligently.
             </p>
 
             {/* Feature Pills */}
             <div className="flex flex-wrap justify-center gap-3">
-              {['24/7 Support', 'Private & Secure', 'Personalized Care'].map((feature, index) => (
+              {['Lightning Fast', 'Private & Secure', 'Always Available'].map((feature, index) => (
                 <motion.div
                   key={feature}
                   initial={{ opacity: 0, y: 10 }}
@@ -278,8 +278,8 @@ export default function Auth() {
                   </h1>
                   <p className="text-muted-foreground">
                     {isSignUp
-                      ? 'Start your mental wellness journey today'
-                      : 'Continue your path to wellness'}
+                      ? 'Start asking, creating, and solving today'
+                      : 'Continue where you left off'}
                   </p>
                 </motion.div>
               </AnimatePresence>

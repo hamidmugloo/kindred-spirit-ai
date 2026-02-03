@@ -106,9 +106,9 @@ export default function Profile() {
                 <User className="w-12 h-12 text-primary" />
               </div>
               <h1 className="text-2xl font-bold text-foreground mt-4">
-                {user.user_metadata?.display_name || 'Friend'}
+                {user.user_metadata?.display_name || 'User'}
               </h1>
-              <p className="text-muted-foreground">ORBIT Member</p>
+              <p className="text-muted-foreground">ORBIT User</p>
             </div>
 
             <div className="p-6 space-y-4">
@@ -200,11 +200,10 @@ export default function Profile() {
           {/* Encouragement Card */}
           <div className="bg-gradient-to-br from-sage-light to-lavender-light rounded-2xl border border-border p-6 text-center">
             <p className="text-foreground font-medium mb-2">
-              🌱 Every conversation is a step forward
+              🚀 Every conversation makes you more productive
             </p>
             <p className="text-sm text-muted-foreground">
-              Thank you for trusting ORBIT with your thoughts and feelings.
-              Remember, seeking support is a sign of strength. 💪
+              Thank you for using ORBIT. Keep asking, creating, and solving! 💪
             </p>
           </div>
         </motion.div>
