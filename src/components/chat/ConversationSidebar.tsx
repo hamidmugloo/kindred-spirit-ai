@@ -144,23 +144,17 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                             {formatDistanceToNow(conversation.updatedAt, { addSuffix: true })}
                           </p>
                         </div>
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileHover={{ opacity: 1, scale: 1 }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive text-muted-foreground shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteConversation(conversation.id);
+                          }}
                         >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteConversation(conversation.id);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </motion.div>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </motion.div>
                   ))
