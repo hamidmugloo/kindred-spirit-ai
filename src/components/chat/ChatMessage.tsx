@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Sparkles, Heart, Bot } from 'lucide-react';
+import { User, Sparkles, Heart, Bot, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
@@ -15,6 +16,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   isLatest,
 }) => {
   const isUser = role === 'user';
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!content) return;
+    
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
 
   return (
     <motion.div
@@ -133,6 +147,30 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               </span>
             )}
           </p>
+
+          {/* Copy button for assistant messages */}
+          {!isUser && content && (
+            <div className="mt-3 pt-2 border-t border-border/30 flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopy}
+                className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-sage" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    Copy
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
