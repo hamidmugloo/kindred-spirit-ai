@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useState, memo } from 'react';
-import { Send, Loader2, Mic, MicOff } from 'lucide-react';
+ import React, { useCallback, useRef, useState, memo } from 'react';
+ import { Send, Loader2, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,9 @@ interface OptimizedChatInputProps {
   isListening: boolean;
   onStartListening: (callback: (text: string) => void) => void;
   onStopListening: () => void;
+ voiceOutputEnabled?: boolean;
+ onToggleVoiceOutput?: () => void;
+ isTTSSupported?: boolean;
 }
 
 // Isolated input component to prevent parent re-renders
@@ -22,6 +25,9 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
   isListening,
   onStartListening,
   onStopListening,
+ voiceOutputEnabled = false,
+ onToggleVoiceOutput,
+ isTTSSupported = false,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -102,25 +108,54 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
           />
           
           {isVoiceSupported && (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              onClick={toggleVoice}
-              disabled={isLoading}
-              className={cn(
-                'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
-                isListening 
-                  ? 'bg-destructive/20 text-destructive' 
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              )}
-            >
-              {isListening ? (
-                <MicOff className="w-5 h-5" />
-              ) : (
-                <Mic className="w-5 h-5" />
-              )}
-            </Button>
+             <div className="flex flex-col items-center gap-1">
+               <Button
+                 type="button"
+                 size="icon"
+                 variant="ghost"
+                 onClick={toggleVoice}
+                 disabled={isLoading}
+                 className={cn(
+                   'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
+                   isListening 
+                     ? 'bg-destructive/20 text-destructive animate-pulse' 
+                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                 )}
+               >
+                 {isListening ? (
+                   <MicOff className="w-5 h-5" />
+                 ) : (
+                   <Mic className="w-5 h-5" />
+                 )}
+               </Button>
+               {isListening && (
+                 <span className="text-[10px] text-destructive font-medium animate-pulse">
+                   Listening...
+                 </span>
+               )}
+             </div>
+           )}
+ 
+           {isTTSSupported && onToggleVoiceOutput && (
+             <Button
+               type="button"
+               size="icon"
+               variant="ghost"
+               onClick={onToggleVoiceOutput}
+               className={cn(
+                 'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
+                 voiceOutputEnabled 
+                   ? 'bg-primary/20 text-primary' 
+                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+               )}
+               title={voiceOutputEnabled ? 'Voice replies on' : 'Voice replies off'}
+             >
+               {voiceOutputEnabled ? (
+                 <Volume2 className="w-5 h-5" />
+               ) : (
+                 <VolumeX className="w-5 h-5" />
+               )}
+             </Button>
           )}
           
           <Button
@@ -146,7 +181,8 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
       <div className="flex items-center justify-center gap-2 mt-3">
         <p className="text-xs text-muted-foreground/70">
           Press <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono mx-1">Enter</kbd> to send
-          {isVoiceSupported && ' • Tap mic for voice'}
+           {isVoiceSupported && ' • Mic for voice'}
+           {isTTSSupported && ' • Speaker for replies'}
         </p>
       </div>
     </form>

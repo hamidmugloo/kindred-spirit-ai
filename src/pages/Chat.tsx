@@ -21,6 +21,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
 import { useOptimizedVoiceInput } from '@/hooks/useOptimizedVoiceInput';
+ import { useVoiceSettings } from '@/hooks/useVoiceSettings';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
@@ -29,6 +30,16 @@ export default function Chat() {
   
   // Voice input hook (isolated for performance)
   const { isListening, isSupported, startListening, stopListening } = useOptimizedVoiceInput();
+ 
+ // Voice settings (TTS and toggles)
+ const { 
+   voiceOutputEnabled, 
+   isTTSSupported, 
+   toggleVoiceOutput, 
+   speak,
+   isSpeaking,
+   stopSpeaking 
+ } = useVoiceSettings();
   
   // UI State - separated for minimal re-renders
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,6 +63,24 @@ export default function Chat() {
     currentConversation,
     setCurrentConversation,
   } = useChat();
+ 
+ // Auto-speak assistant responses when voice output is enabled
+ const lastMessageRef = React.useRef<string | null>(null);
+ 
+ React.useEffect(() => {
+   if (!voiceOutputEnabled || messages.length === 0) return;
+   
+   const lastMessage = messages[messages.length - 1];
+   if (
+     lastMessage.role === 'assistant' && 
+     lastMessage.content && 
+     lastMessage.content !== lastMessageRef.current &&
+     !isLoading
+   ) {
+     lastMessageRef.current = lastMessage.content;
+     speak(lastMessage.content);
+   }
+ }, [messages, voiceOutputEnabled, isLoading, speak]);
 
   const {
     conversations,
@@ -267,6 +296,9 @@ export default function Chat() {
               isListening={isListening}
               onStartListening={startListening}
               onStopListening={stopListening}
+             voiceOutputEnabled={voiceOutputEnabled}
+             onToggleVoiceOutput={toggleVoiceOutput}
+             isTTSSupported={isTTSSupported}
             />
           </div>
         </div>
