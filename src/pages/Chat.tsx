@@ -20,26 +20,27 @@ import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
-import { useOptimizedVoiceInput } from '@/hooks/useOptimizedVoiceInput';
- import { useVoiceSettings } from '@/hooks/useVoiceSettings';
+ import { useVoiceConversation } from '@/hooks/useVoiceConversation';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Voice input hook (isolated for performance)
-  const { isListening, isSupported, startListening, stopListening } = useOptimizedVoiceInput();
- 
- // Voice settings (TTS and toggles)
- const { 
-   voiceOutputEnabled, 
-   isTTSSupported, 
-   toggleVoiceOutput, 
-   speak,
-   isSpeaking,
-   stopSpeaking 
- } = useVoiceSettings();
+   // Unified voice conversation hook
+   const {
+     isListening,
+     isSpeaking,
+     voiceModeEnabled,
+     lastInputWasVoice,
+     isVoiceSupported,
+     startListening,
+     stopListening,
+     speak,
+     stopSpeaking,
+     toggleVoiceMode,
+     markInputAsText,
+   } = useVoiceConversation();
   
   // UI State - separated for minimal re-renders
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -64,23 +65,27 @@ export default function Chat() {
     setCurrentConversation,
   } = useChat();
  
- // Auto-speak assistant responses when voice output is enabled
- const lastMessageRef = React.useRef<string | null>(null);
+   // Auto-speak assistant responses when voice mode is enabled
+   const lastMessageRef = React.useRef<string | null>(null);
  
- React.useEffect(() => {
-   if (!voiceOutputEnabled || messages.length === 0) return;
-   
-   const lastMessage = messages[messages.length - 1];
-   if (
-     lastMessage.role === 'assistant' && 
-     lastMessage.content && 
-     lastMessage.content !== lastMessageRef.current &&
-     !isLoading
-   ) {
-     lastMessageRef.current = lastMessage.content;
-     speak(lastMessage.content);
-   }
- }, [messages, voiceOutputEnabled, isLoading, speak]);
+   React.useEffect(() => {
+     if (messages.length === 0 || isLoading) return;
+ 
+     const lastMessage = messages[messages.length - 1];
+     
+     // Speak if voice mode is on OR if last input was voice
+     const shouldSpeak = voiceModeEnabled || lastInputWasVoice;
+     
+     if (
+       shouldSpeak &&
+       lastMessage.role === 'assistant' &&
+       lastMessage.content &&
+       lastMessage.content !== lastMessageRef.current
+     ) {
+       lastMessageRef.current = lastMessage.content;
+       speak(lastMessage.content, true); // Force speak
+     }
+   }, [messages, voiceModeEnabled, lastInputWasVoice, isLoading, speak]);
 
   const {
     conversations,
@@ -292,13 +297,15 @@ export default function Chat() {
                   ? "Share what's on your mind..."
                   : 'Continue our conversation...'
               }
-              isVoiceSupported={isSupported}
+              isVoiceSupported={isVoiceSupported}
               isListening={isListening}
               onStartListening={startListening}
               onStopListening={stopListening}
-             voiceOutputEnabled={voiceOutputEnabled}
-             onToggleVoiceOutput={toggleVoiceOutput}
-             isTTSSupported={isTTSSupported}
+              voiceModeEnabled={voiceModeEnabled}
+              onToggleVoiceMode={toggleVoiceMode}
+              isSpeaking={isSpeaking}
+              onStopSpeaking={stopSpeaking}
+              onTextInput={markInputAsText}
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
  import React, { useCallback, useRef, useState, memo } from 'react';
- import { Send, Loader2, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+ import { Send, Loader2, Mic, MicOff, AudioLines, AudioLinesIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,9 +11,11 @@ interface OptimizedChatInputProps {
   isListening: boolean;
   onStartListening: (callback: (text: string) => void) => void;
   onStopListening: () => void;
- voiceOutputEnabled?: boolean;
- onToggleVoiceOutput?: () => void;
- isTTSSupported?: boolean;
+ voiceModeEnabled?: boolean;
+ onToggleVoiceMode?: () => void;
+ isSpeaking?: boolean;
+ onStopSpeaking?: () => void;
+ onTextInput?: () => void;
 }
 
 // Isolated input component to prevent parent re-renders
@@ -25,9 +27,11 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
   isListening,
   onStartListening,
   onStopListening,
- voiceOutputEnabled = false,
- onToggleVoiceOutput,
- isTTSSupported = false,
+ voiceModeEnabled = false,
+ onToggleVoiceMode,
+ isSpeaking = false,
+ onStopSpeaking,
+ onTextInput,
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -42,10 +46,12 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
     });
   }, []);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-    autosize();
-  }, [autosize]);
+ const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+   setMessage(e.target.value);
+   autosize();
+   // Mark as text input when user types
+   onTextInput?.();
+ }, [autosize, onTextInput]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -116,10 +122,11 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
                  onClick={toggleVoice}
                  disabled={isLoading}
                  className={cn(
-                   'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
+                   'h-12 w-12 rounded-2xl flex-shrink-0 transition-all',
                    isListening 
-                     ? 'bg-destructive/20 text-destructive animate-pulse' 
-                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                     ? 'bg-destructive text-destructive-foreground scale-110 shadow-lg' 
+                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                   isSpeaking && 'opacity-50'
                  )}
                >
                  {isListening ? (
@@ -129,32 +136,44 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
                  )}
                </Button>
                {isListening && (
-                 <span className="text-[10px] text-destructive font-medium animate-pulse">
+                 <span className="absolute -top-6 text-xs text-destructive font-medium animate-pulse whitespace-nowrap">
                    Listening...
                  </span>
                )}
              </div>
            )}
- 
-           {isTTSSupported && onToggleVoiceOutput && (
+           
+           {isSpeaking && onStopSpeaking && (
              <Button
                type="button"
                size="icon"
                variant="ghost"
-               onClick={onToggleVoiceOutput}
+               onClick={onStopSpeaking}
                className={cn(
                  'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
-                 voiceOutputEnabled 
+                 'bg-primary/20 text-primary animate-pulse'
+               )}
+               title="Stop speaking"
+             >
+               <AudioLines className="w-5 h-5" />
+             </Button>
+           )}
+ 
+           {onToggleVoiceMode && !isSpeaking && (
+             <Button
+               type="button"
+               size="icon"
+               variant="ghost"
+               onClick={onToggleVoiceMode}
+               className={cn(
+                 'h-10 w-10 rounded-xl flex-shrink-0 transition-colors',
+                 voiceModeEnabled 
                    ? 'bg-primary/20 text-primary' 
                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                )}
-               title={voiceOutputEnabled ? 'Voice replies on' : 'Voice replies off'}
+               title={voiceModeEnabled ? 'Voice mode on' : 'Voice mode off'}
              >
-               {voiceOutputEnabled ? (
-                 <Volume2 className="w-5 h-5" />
-               ) : (
-                 <VolumeX className="w-5 h-5" />
-               )}
+               <AudioLines className="w-5 h-5" />
              </Button>
           )}
           
@@ -182,7 +201,7 @@ const OptimizedChatInput = memo<OptimizedChatInputProps>(({
         <p className="text-xs text-muted-foreground/70">
           Press <kbd className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[10px] font-mono mx-1">Enter</kbd> to send
            {isVoiceSupported && ' • Mic for voice'}
-           {isTTSSupported && ' • Speaker for replies'}
+           {voiceModeEnabled && ' • Voice mode on'}
         </p>
       </div>
     </form>
