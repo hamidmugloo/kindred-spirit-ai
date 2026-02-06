@@ -54,18 +54,53 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-      });
-      
-      console.log('Google OAuth result:', result);
-      
-      if (result.error) {
-        console.error('Google OAuth error:', result.error);
-        toast.error(`Google sign-in failed: ${result.error.message || 'Please try again.'}`);
-      } else if (result.redirected) {
-        // User was redirected to Google, waiting for callback
-        console.log('Redirected to Google for authentication');
+      // Detect if we're on a custom domain (not Lovable preview)
+      const isCustomDomain =
+        !window.location.hostname.includes('lovable.app') &&
+        !window.location.hostname.includes('lovableproject.com') &&
+        !window.location.hostname.includes('localhost');
+
+      if (isCustomDomain) {
+        // For custom domains (like Vercel), bypass auth-bridge and use Supabase directly
+        const { supabase } = await import('@/integrations/supabase/client');
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/chat`,
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) {
+          console.error('Google OAuth error:', error);
+          toast.error(`Google sign-in failed: ${error.message || 'Please try again.'}`);
+          return;
+        }
+
+        // Validate and redirect to OAuth URL
+        if (data?.url) {
+          const oauthUrl = new URL(data.url);
+          const allowedHosts = ['accounts.google.com', 'ltqmuqozsqncdzzhkxwj.supabase.co'];
+          if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
+            throw new Error('Invalid OAuth redirect URL');
+          }
+          window.location.href = data.url;
+        }
+      } else {
+        // For Lovable domains, use managed OAuth flow
+        const result = await lovable.auth.signInWithOAuth('google', {
+          redirect_uri: window.location.origin,
+        });
+        
+        console.log('Google OAuth result:', result);
+        
+        if (result.error) {
+          console.error('Google OAuth error:', result.error);
+          toast.error(`Google sign-in failed: ${result.error.message || 'Please try again.'}`);
+        } else if (result.redirected) {
+          console.log('Redirected to Google for authentication');
+        }
       }
     } catch (err) {
       console.error('Google OAuth exception:', err);
