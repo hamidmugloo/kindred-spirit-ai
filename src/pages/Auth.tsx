@@ -54,13 +54,21 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth('google', {
+      const result = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
       });
-      if (error) {
-        toast.error('Failed to sign in with Google. Please try again.');
+      
+      console.log('Google OAuth result:', result);
+      
+      if (result.error) {
+        console.error('Google OAuth error:', result.error);
+        toast.error(`Google sign-in failed: ${result.error.message || 'Please try again.'}`);
+      } else if (result.redirected) {
+        // User was redirected to Google, waiting for callback
+        console.log('Redirected to Google for authentication');
       }
     } catch (err) {
+      console.error('Google OAuth exception:', err);
       toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsGoogleLoading(false);
