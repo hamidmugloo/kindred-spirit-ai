@@ -34,6 +34,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
@@ -107,6 +108,65 @@ export default function Auth() {
       toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsGoogleLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setIsAppleLoading(true);
+    try {
+      // Detect if we're on a custom domain (not Lovable preview)
+      const isCustomDomain =
+        !window.location.hostname.includes('lovable.app') &&
+        !window.location.hostname.includes('lovableproject.com') &&
+        !window.location.hostname.includes('localhost');
+
+      if (isCustomDomain) {
+        // For custom domains (like Vercel), bypass auth-bridge and use Supabase directly
+        const { supabase } = await import('@/integrations/supabase/client');
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'apple',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) {
+          console.error('Apple OAuth error:', error);
+          toast.error(`Apple sign-in failed: ${error.message || 'Please try again.'}`);
+          return;
+        }
+
+        // Validate and redirect to OAuth URL
+        if (data?.url) {
+          const oauthUrl = new URL(data.url);
+          const allowedHosts = ['appleid.apple.com', 'ltqmuqozsqncdzzhkxwj.supabase.co'];
+          if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
+            throw new Error('Invalid OAuth redirect URL');
+          }
+          window.location.href = data.url;
+        }
+      } else {
+        // For Lovable domains, use managed OAuth flow
+        const result = await lovable.auth.signInWithOAuth('apple', {
+          redirect_uri: window.location.origin,
+        });
+        
+        console.log('Apple OAuth result:', result);
+        
+        if (result.error) {
+          console.error('Apple OAuth error:', result.error);
+          toast.error(`Apple sign-in failed: ${result.error.message || 'Please try again.'}`);
+        } else if (result.redirected) {
+          console.log('Redirected to Apple for authentication');
+        }
+      }
+    } catch (err) {
+      console.error('Apple OAuth exception:', err);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsAppleLoading(false);
     }
   };
 
@@ -373,6 +433,39 @@ export default function Auth() {
                         />
                       </svg>
                       Continue with Google
+                    </span>
+                  )}
+                </Button>
+              </motion.div>
+
+              {/* Apple Sign In */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-14 text-base font-medium relative overflow-hidden group border-2 hover:border-primary/50 hover:bg-accent/50 transition-all duration-300"
+                  onClick={handleAppleSignIn}
+                  disabled={isAppleLoading}
+                >
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
+                    transition={{ duration: 0.6 }}
+                  />
+                  {isAppleLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <span className="relative flex items-center gap-3">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                      </svg>
+                      Continue with Apple
                     </span>
                   )}
                 </Button>
