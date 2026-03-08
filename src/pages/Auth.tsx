@@ -55,32 +55,13 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      // Always use Supabase directly with skipBrowserRedirect to avoid ERR_BLOCKED_BY_RESPONSE
-      // This prevents iframe/popup blocking issues on both Lovable and custom domains
-      const { supabase } = await import('@/integrations/supabase/client');
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          skipBrowserRedirect: true,
-        },
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
 
       if (error) {
         console.error('Google OAuth error:', error);
         toast.error(`Google sign-in failed: ${error.message || 'Please try again.'}`);
-        return;
-      }
-
-      // Validate and redirect to OAuth URL
-      if (data?.url) {
-        const oauthUrl = new URL(data.url);
-        const allowedHosts = ['accounts.google.com', 'ltqmuqozsqncdzzhkxwj.supabase.co'];
-        if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
-          throw new Error('Invalid OAuth redirect URL');
-        }
-        window.location.href = data.url;
       }
     } catch (err) {
       console.error('Google OAuth exception:', err);
