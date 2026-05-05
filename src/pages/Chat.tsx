@@ -308,7 +308,10 @@ export default function Chat() {
               onStartListening={startListening}
               onStopListening={stopListening}
               voiceModeEnabled={voiceModeEnabled}
-              onToggleVoiceMode={toggleVoiceMode}
+              onToggleVoiceMode={() => {
+                if (!voiceModeEnabled) toggleVoiceMode();
+                setVoiceOverlayOpen(true);
+              }}
               isSpeaking={isSpeaking}
               onStopSpeaking={stopSpeaking}
               onTextInput={markInputAsText}
@@ -316,6 +319,37 @@ export default function Chat() {
           </div>
         </div>
       </main>
+
+      <VoiceModeOverlay
+        open={voiceOverlayOpen}
+        onClose={() => {
+          setVoiceOverlayOpen(false);
+          stopListening();
+          stopSpeaking();
+        }}
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        liveTranscript={liveTranscript}
+        inputLevel={inputLevel}
+        outputLevel={outputLevel}
+        lastAssistantMessage={
+          messages.length > 0 && messages[messages.length - 1].role === 'assistant'
+            ? messages[messages.length - 1].content
+            : undefined
+        }
+        onStartListening={() => {
+          let finalText = '';
+          startListening(
+            (text) => { finalText = text; },
+            () => {
+              const trimmed = finalText.trim();
+              if (trimmed) sendMessage(trimmed);
+            }
+          );
+        }}
+        onStopListening={stopListening}
+        onStopSpeaking={stopSpeaking}
+      />
     </div>
   );
 }
