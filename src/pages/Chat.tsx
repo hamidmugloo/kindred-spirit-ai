@@ -20,7 +20,8 @@ import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
- import { useVoiceConversation } from '@/hooks/useVoiceConversation';
+import { useVoiceConversation } from '@/hooks/useVoiceConversation';
+import { VoiceModeOverlay } from '@/components/voice/VoiceModeOverlay';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
