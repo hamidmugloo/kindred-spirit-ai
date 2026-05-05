@@ -29,19 +29,24 @@ export default function Chat() {
   const navigate = useNavigate();
   
    // Unified voice conversation hook
-   const {
-     isListening,
-     isSpeaking,
-     voiceModeEnabled,
-     lastInputWasVoice,
-     isVoiceSupported,
-     startListening,
-     stopListening,
-     speak,
-     stopSpeaking,
-     toggleVoiceMode,
-     markInputAsText,
-   } = useVoiceConversation();
+  const {
+    isListening,
+    isSpeaking,
+    voiceModeEnabled,
+    lastInputWasVoice,
+    liveTranscript,
+    inputLevel,
+    outputLevel,
+    isVoiceSupported,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    toggleVoiceMode,
+    markInputAsText,
+  } = useVoiceConversation();
+
+  const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   
   // UI State - separated for minimal re-renders
   const [sidebarOpen, setSidebarOpen] = useState(false);
