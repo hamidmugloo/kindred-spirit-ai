@@ -74,7 +74,7 @@ export const MeditationTimer: React.FC<MeditationTimerProps> = ({ isOpen, onClos
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopSound = useCallback(() => {
     if (oscillatorRef.current) {

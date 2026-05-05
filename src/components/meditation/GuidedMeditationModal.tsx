@@ -148,7 +148,7 @@ export function GuidedMeditationModal({ isOpen, onClose, onComplete }: GuidedMed
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [currentInstruction, setCurrentInstruction] = useState('');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!selectedSession) return;
