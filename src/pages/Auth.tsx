@@ -42,6 +42,17 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
+  const isEmbeddedPreview = () => window.self !== window.top;
+
+  const openAuthInNewTab = () => {
+    const opened = window.open(window.location.href, '_blank', 'noopener,noreferrer');
+    if (opened) {
+      toast.info('Google blocks sign-in inside the preview. Continue in the new tab that just opened.');
+    } else {
+      toast.info('Google blocks sign-in inside the preview. Open this app in a new browser tab, then try again.');
+    }
+  };
+
   useEffect(() => {
     if (user) {
       navigate('/chat');
@@ -53,6 +64,11 @@ export default function Auth() {
   }, [searchParams]);
 
   const handleGoogleSignIn = async () => {
+    if (isEmbeddedPreview()) {
+      openAuthInNewTab();
+      return;
+    }
+
     setIsGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
@@ -71,6 +87,11 @@ export default function Auth() {
   };
 
   const handleAppleSignIn = async () => {
+    if (isEmbeddedPreview()) {
+      openAuthInNewTab();
+      return;
+    }
+
     setIsAppleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("apple", {
