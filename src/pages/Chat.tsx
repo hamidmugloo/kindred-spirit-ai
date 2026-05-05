@@ -20,7 +20,8 @@ import { useChat } from '@/hooks/useChat';
 import { useConversations } from '@/hooks/useConversations';
 import { useMoodTracking } from '@/hooks/useMoodTracking';
 import { useStreaksAndAchievements } from '@/hooks/useStreaksAndAchievements';
- import { useVoiceConversation } from '@/hooks/useVoiceConversation';
+import { useVoiceConversation } from '@/hooks/useVoiceConversation';
+import { VoiceModeOverlay } from '@/components/voice/VoiceModeOverlay';
 import { Loader2 } from 'lucide-react';
 
 export default function Chat() {
@@ -28,19 +29,24 @@ export default function Chat() {
   const navigate = useNavigate();
   
    // Unified voice conversation hook
-   const {
-     isListening,
-     isSpeaking,
-     voiceModeEnabled,
-     lastInputWasVoice,
-     isVoiceSupported,
-     startListening,
-     stopListening,
-     speak,
-     stopSpeaking,
-     toggleVoiceMode,
-     markInputAsText,
-   } = useVoiceConversation();
+  const {
+    isListening,
+    isSpeaking,
+    voiceModeEnabled,
+    lastInputWasVoice,
+    liveTranscript,
+    inputLevel,
+    outputLevel,
+    isVoiceSupported,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    toggleVoiceMode,
+    markInputAsText,
+  } = useVoiceConversation();
+
+  const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   
   // UI State - separated for minimal re-renders
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -302,7 +308,10 @@ export default function Chat() {
               onStartListening={startListening}
               onStopListening={stopListening}
               voiceModeEnabled={voiceModeEnabled}
-              onToggleVoiceMode={toggleVoiceMode}
+              onToggleVoiceMode={() => {
+                if (!voiceModeEnabled) toggleVoiceMode();
+                setVoiceOverlayOpen(true);
+              }}
               isSpeaking={isSpeaking}
               onStopSpeaking={stopSpeaking}
               onTextInput={markInputAsText}
@@ -310,6 +319,37 @@ export default function Chat() {
           </div>
         </div>
       </main>
+
+      <VoiceModeOverlay
+        open={voiceOverlayOpen}
+        onClose={() => {
+          setVoiceOverlayOpen(false);
+          stopListening();
+          stopSpeaking();
+        }}
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        liveTranscript={liveTranscript}
+        inputLevel={inputLevel}
+        outputLevel={outputLevel}
+        lastAssistantMessage={
+          messages.length > 0 && messages[messages.length - 1].role === 'assistant'
+            ? messages[messages.length - 1].content
+            : undefined
+        }
+        onStartListening={() => {
+          let finalText = '';
+          startListening(
+            (text) => { finalText = text; },
+            () => {
+              const trimmed = finalText.trim();
+              if (trimmed) sendMessage(trimmed);
+            }
+          );
+        }}
+        onStopListening={stopListening}
+        onStopSpeaking={stopSpeaking}
+      />
     </div>
   );
 }
