@@ -79,8 +79,8 @@ export default function Chat() {
  
      const lastMessage = messages[messages.length - 1];
      
-     // Speak if voice mode is on OR if last input was voice
-     const shouldSpeak = voiceModeEnabled || lastInputWasVoice;
+     // Only speak when the user is actively in voice mode (overlay open) or just spoke via mic
+     const shouldSpeak = (voiceModeEnabled && voiceOverlayOpen) || lastInputWasVoice;
      
      if (
        shouldSpeak &&
@@ -91,7 +91,7 @@ export default function Chat() {
        lastMessageRef.current = lastMessage.content;
        speak(lastMessage.content, true); // Force speak
      }
-   }, [messages, voiceModeEnabled, lastInputWasVoice, isLoading, speak]);
+   }, [messages, voiceModeEnabled, voiceOverlayOpen, lastInputWasVoice, isLoading, speak]);
 
   const {
     conversations,
