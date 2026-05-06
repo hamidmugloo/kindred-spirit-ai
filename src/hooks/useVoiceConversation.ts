@@ -1,6 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+type WindowWithWebkitAudioContext = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 interface VoiceConversationState {
   isListening: boolean;
   isSpeaking: boolean;
@@ -56,7 +60,8 @@ export const useVoiceConversation = () => {
 
   const ensureAudioCtx = useCallback(() => {
     if (!audioCtxRef.current) {
-      const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+      const Ctx = window.AudioContext || (window as WindowWithWebkitAudioContext).webkitAudioContext;
+      if (!Ctx) throw new Error('AudioContext unavailable');
       audioCtxRef.current = new Ctx();
     }
     return audioCtxRef.current!;
@@ -132,7 +137,7 @@ export const useVoiceConversation = () => {
 
   const cleanup = useCallback(() => {
     if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
+      try { recognitionRef.current.abort(); } catch (error) { void error; }
       recognitionRef.current = null;
     }
     if (silenceTimeoutRef.current) {
@@ -148,7 +153,7 @@ export const useVoiceConversation = () => {
       try {
         audioElRef.current.pause();
         audioElRef.current.src = '';
-      } catch {}
+      } catch (error) { void error; }
       audioElRef.current = null;
     }
     if (isTTSSupported) window.speechSynthesis.cancel();
@@ -246,7 +251,7 @@ export const useVoiceConversation = () => {
       stopLevelLoop();
       teardownMicAnalyser();
     }
-  }, [isVoiceSupported, cleanup, stopSpeaking, setupMicAnalyser, startLevelLoop, teardownMicAnalyser]);
+  }, [isVoiceSupported, cleanup, stopSpeaking, setupMicAnalyser, startLevelLoop, stopLevelLoop, teardownMicAnalyser]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -257,7 +262,7 @@ export const useVoiceConversation = () => {
   const cleanTextForSpeech = (text: string) => text
     .replace(/```[\s\S]*?```/g, ' code block omitted ')
     .replace(/`[^`]+`/g, '')
-    .replace(/[*#_~\[\]]/g, '')
+    .replace(/[*#_~[\]]/g, '')
     .replace(/https?:\/\/\S+/g, ' link ')
     .replace(/\n+/g, '. ')
     .replace(/\s+/g, ' ')
@@ -290,6 +295,11 @@ export const useVoiceConversation = () => {
       });
       if (error || !data) throw new Error(error?.message || 'TTS error');
 
+      if (!(data instanceof Blob)) {
+        const fallback = data as { fallback?: boolean; reason?: string };
+        if (fallback?.fallback) throw new Error(fallback.reason || 'TTS fallback requested');
+      }
+
       // data is a Blob when returned as audio/mpeg
       const blob = data instanceof Blob ? data : new Blob([data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
@@ -298,7 +308,7 @@ export const useVoiceConversation = () => {
 
       // Wire output analyser
       const ctx = ensureAudioCtx();
-      try { await ctx.resume(); } catch {}
+      try { await ctx.resume(); } catch (error) { void error; }
       const src = ctx.createMediaElementSource(audio);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;

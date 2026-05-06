@@ -4,6 +4,12 @@ const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const fallbackResponse = (reason: string, providerStatus?: number) =>
+  new Response(JSON.stringify({ fallback: true, reason, providerStatus }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -12,10 +18,7 @@ Deno.serve(async (req) => {
   try {
     const apiKey = Deno.env.get('ELEVENLABS_API_KEY');
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'ELEVENLABS_API_KEY not configured' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return fallbackResponse('ELEVENLABS_API_KEY not configured');
     }
 
     const { text, voiceId } = await req.json();
@@ -47,10 +50,8 @@ Deno.serve(async (req) => {
 
     if (!resp.ok || !resp.body) {
       const err = await resp.text();
-      return new Response(JSON.stringify({ error: `TTS failed: ${resp.status} ${err}` }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.warn(`ElevenLabs TTS unavailable: ${resp.status} ${err}`);
+      return fallbackResponse(`TTS unavailable: ${err || resp.statusText}`, resp.status);
     }
 
     return new Response(resp.body, {
