@@ -360,6 +360,7 @@ export const useVoiceConversation = () => {
       }
     } catch (e) {
       console.warn('ElevenLabs TTS failed, falling back to browser:', e);
+      notifyFallback(e instanceof Error ? e.message : undefined);
       await speakBrowser(cleanText);
     }
   }, [ensureAudioCtx, setupMicAnalyser, startLevelLoop, stopSpeaking, stopLevelLoop, teardownMicAnalyser, speakBrowser]);
