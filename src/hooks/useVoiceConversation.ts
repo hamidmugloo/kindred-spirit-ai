@@ -1,5 +1,19 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+let fallbackNotified = false;
+const notifyFallback = (reason?: string) => {
+  if (fallbackNotified) return;
+  fallbackNotified = true;
+  const isPermission = reason?.toLowerCase().includes('permission') || reason?.includes('401');
+  toast.info('Using browser voice', {
+    description: isPermission
+      ? "Premium voice unavailable: your ElevenLabs API key is missing the text_to_speech permission. Generate a new key at elevenlabs.io/app/settings/api-keys with that permission enabled, then update it in project secrets."
+      : 'Premium voice is temporarily unavailable, so ORBIT is using your browser voice instead.',
+    duration: 8000,
+  });
+};
 
 type WindowWithWebkitAudioContext = Window & typeof globalThis & {
   webkitAudioContext?: typeof AudioContext;
@@ -297,7 +311,10 @@ export const useVoiceConversation = () => {
 
       if (!(data instanceof Blob)) {
         const fallback = data as { fallback?: boolean; reason?: string };
-        if (fallback?.fallback) throw new Error(fallback.reason || 'TTS fallback requested');
+        if (fallback?.fallback) {
+          notifyFallback(fallback.reason);
+          throw new Error(fallback.reason || 'TTS fallback requested');
+        }
       }
 
       // data is a Blob when returned as audio/mpeg
@@ -343,6 +360,7 @@ export const useVoiceConversation = () => {
       }
     } catch (e) {
       console.warn('ElevenLabs TTS failed, falling back to browser:', e);
+      notifyFallback(e instanceof Error ? e.message : undefined);
       await speakBrowser(cleanText);
     }
   }, [ensureAudioCtx, setupMicAnalyser, startLevelLoop, stopSpeaking, stopLevelLoop, teardownMicAnalyser, speakBrowser]);
