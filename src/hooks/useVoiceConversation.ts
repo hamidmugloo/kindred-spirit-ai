@@ -290,6 +290,11 @@ export const useVoiceConversation = () => {
       });
       if (error || !data) throw new Error(error?.message || 'TTS error');
 
+      if (!(data instanceof Blob)) {
+        const fallback = data as { fallback?: boolean; reason?: string };
+        if (fallback?.fallback) throw new Error(fallback.reason || 'TTS fallback requested');
+      }
+
       // data is a Blob when returned as audio/mpeg
       const blob = data instanceof Blob ? data : new Blob([data], { type: 'audio/mpeg' });
       const url = URL.createObjectURL(blob);
