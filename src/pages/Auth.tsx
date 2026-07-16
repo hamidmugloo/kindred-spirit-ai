@@ -53,11 +53,14 @@ export default function Auth() {
     }
   };
 
+  const nextParam = searchParams.get('next');
+  const safeNext = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : null;
+
   useEffect(() => {
     if (user) {
-      navigate('/chat');
+      navigate(safeNext ?? '/chat');
     }
-  }, [user, navigate]);
+  }, [user, navigate, safeNext]);
 
   useEffect(() => {
     setIsSignUp(searchParams.get('mode') === 'signup');
@@ -72,7 +75,7 @@ export default function Auth() {
     setIsGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: safeNext ? `${window.location.origin}${safeNext}` : window.location.origin,
       });
       if (error) {
         console.error('Google OAuth error:', error);
@@ -121,7 +124,7 @@ export default function Auth() {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        err.errors.forEach((error) => {
+        err.issues.forEach((error) => {
           if (error.path[0]) {
             newErrors[error.path[0] as string] = error.message;
           }

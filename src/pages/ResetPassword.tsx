@@ -76,7 +76,7 @@ export default function ResetPassword() {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        err.errors.forEach((error) => {
+        err.issues.forEach((error) => {
           if (error.path[0]) {
             newErrors[error.path[0] as string] = error.message;
           }
