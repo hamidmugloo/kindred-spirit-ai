@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.2",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ltqmuqozsqncdzzhkxwj.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "orbit-mcp",
+      "version": "0.1.0",
+      "title": "ORBIT"
+    },
+    "tools": [
+      {
+        "name": "list_conversations",
+        "title": "List conversations",
+        "description": "List the signed-in user's ORBIT chat conversations, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max conversations to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_conversation_messages",
+        "title": "Get conversation messages",
+        "description": "Return messages from one of the user's ORBIT conversations, oldest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "conversation_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Conversation id to fetch messages for."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            }
+          },
+          "required": [
+            "conversation_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_memories",
+        "title": "List memories",
+        "description": "List the user's saved ORBIT long-term memories.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "save_memory",
+        "title": "Save memory",
+        "description": "Save or update a long-term memory for the signed-in user. Do not store medical diagnoses, medications, or mental health conditions.",
+        "annotations": {
+          "readOnlyHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "memory_type": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Category (e.g. preference, fact, context)."
+            },
+            "memory_key": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Stable key for this memory."
+            },
+            "memory_value": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Memory value / content."
+            }
+          },
+          "required": [
+            "memory_type",
+            "memory_key",
+            "memory_value"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_journal_entries",
+        "title": "List journal entries",
+        "description": "List the user's ORBIT journal entries, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_journal_entry",
+        "title": "Create journal entry",
+        "description": "Create a new journal entry for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "minLength": 1
+            },
+            "title": {
+              "type": "string"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "mood_tag": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "content"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_mood",
+        "title": "Log mood",
+        "description": "Log a mood entry for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "mood": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Short mood label (e.g. happy, anxious)."
+            },
+            "mood_score": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "1-10 score."
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "mood",
+            "mood_score"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_moods",
+        "title": "List mood entries",
+        "description": "List the user's recent mood entries, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
