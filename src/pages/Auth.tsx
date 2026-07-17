@@ -40,17 +40,6 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  const isEmbeddedPreview = () => window.self !== window.top;
-
-  const openAuthInNewTab = () => {
-    const opened = window.open(window.location.href, '_blank', 'noopener,noreferrer');
-    if (opened) {
-      toast.info('Google blocks sign-in inside the preview. Continue in the new tab that just opened.');
-    } else {
-      toast.info('Google blocks sign-in inside the preview. Open this app in a new browser tab, then try again.');
-    }
-  };
-
   const nextParam = searchParams.get('next');
   const safeNext = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : null;
 
@@ -64,51 +53,6 @@ export default function Auth() {
     setIsSignUp(searchParams.get('mode') === 'signup');
   }, [searchParams]);
 
-  const handleGoogleSignIn = async () => {
-    if (isEmbeddedPreview()) {
-      openAuthInNewTab();
-      return;
-    }
-
-    setIsGoogleLoading(true);
-    try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: safeNext ? `${window.location.origin}${safeNext}` : window.location.origin,
-      });
-      if (error) {
-        console.error('Google OAuth error:', error);
-        toast.error(`Google sign-in failed: ${error.message || 'Please try again.'}`);
-      }
-    } catch (err) {
-      console.error('Google OAuth exception:', err);
-      toast.error('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    if (isEmbeddedPreview()) {
-      openAuthInNewTab();
-      return;
-    }
-
-    setIsAppleLoading(true);
-    try {
-      const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) {
-        console.error('Apple OAuth error:', error);
-        toast.error(`Apple sign-in failed: ${error.message || 'Please try again.'}`);
-      }
-    } catch (err) {
-      console.error('Apple OAuth exception:', err);
-      toast.error('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsAppleLoading(false);
-    }
-  };
 
   const validateForm = () => {
     try {
