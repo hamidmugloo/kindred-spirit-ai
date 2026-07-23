@@ -1,0 +1,4 @@
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS support_tone TEXT,
+  ADD COLUMN IF NOT EXISTS goals TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT false;

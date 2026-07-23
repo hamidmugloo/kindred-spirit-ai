@@ -174,7 +174,10 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          goals: string[]
           id: string
+          onboarding_completed: boolean
+          support_tone: string | null
           updated_at: string
           user_id: string
         }
@@ -182,7 +185,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          goals?: string[]
           id?: string
+          onboarding_completed?: boolean
+          support_tone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -190,7 +196,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          goals?: string[]
           id?: string
+          onboarding_completed?: boolean
+          support_tone?: string | null
           updated_at?: string
           user_id?: string
         }
