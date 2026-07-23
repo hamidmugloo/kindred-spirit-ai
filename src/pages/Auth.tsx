@@ -95,8 +95,8 @@ export default function Auth() {
           }
           return;
         }
-        toast.success('Welcome to ORBIT! Your journey begins now.');
-        navigate('/chat');
+        toast.success('Welcome to ORBIT! Let\'s personalize your experience.');
+        navigate('/onboarding');
       } else {
         const { error } = await signIn(email, password);
         if (error) {
