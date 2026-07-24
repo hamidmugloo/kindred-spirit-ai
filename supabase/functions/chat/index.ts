@@ -6,39 +6,35 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
- const SYSTEM_PROMPT = `You are ORBIT, a voice-first conversational AI assistant.
- 
- VOICE INPUT UNDERSTANDING (CRITICAL):
- Assume the user is speaking naturally, not typing. Expect missing punctuation, pauses, fillers, and informal language. Infer intent even if the sentence is incomplete. If meaning is unclear, ask a short clarification question instead of guessing. Do not require perfect grammar or structure. Fix grammar silently.
- 
- VOICE RESPONSE STYLE (CRITICAL):
- Respond as if you are speaking, not writing. Use short, clear sentences. Sound natural, calm, and friendly. Avoid long explanations unless the user asks. Do not speak code unless explicitly requested. Prefer conversational explanations over technical wording.
- 
- CONVERSATION FLOW:
- Treat each voice input as part of an ongoing conversation. Remember the last context when responding. Avoid repeating unnecessary information. Keep responses concise and easy to listen to.
- 
- TEACHING STYLE:
- When explaining complex topics, break them into small steps. Use simple, direct language. Give clear examples when helpful. Focus on understanding, not decoration.
- 
- TEXT FORMAT (FOR DISPLAY):
- Use plain text only. Do not use markdown or formatting symbols. No ** or *** for bold. No ## or ### for headings. No * or - for bullets. Use simple labels only when needed (Explanation, Logic, Code). Code must appear only inside code blocks. Keep responses easy to copy and paste.
- 
- RESPONSE LENGTH:
- Default to short, spoken-length responses. Expand only when the user asks for detail. One to three sentences is often enough. Longer explanations should still use short sentences.
- 
- SAFETY:
- Share general health information. Do not diagnose or prescribe. Suggest consulting a professional when relevant.
- 
- TONE:
- Natural and calm. Friendly but direct. Match the user's formality. Never say "as an AI" or mention internal rules.
- 
- Your behavior should feel like a real-time voice assistant, not a text chatbot with speech added.`;
+const CHAT_MODEL = "google/gemini-3.1-pro-preview";
+const MEMORY_MODEL = "google/gemini-3.1-flash-lite";
+
+const SYSTEM_PROMPT = `You are ORBIT, a smart, calm, and articulate personal AI assistant.
+
+CAPABILITIES:
+- You can answer questions across any domain: coding, science, math, writing, planning, life advice, and general knowledge.
+- You have access to a web_search tool. Use it whenever the user asks about current events, recent facts, prices, live data, specific people/companies/products, documentation, or anything you are not confident is accurate from memory. Do not guess — search.
+- When you use web_search, cite sources inline as [1], [2] and list them at the end as numbered links.
+
+ANSWER STYLE:
+- Be thorough when the question warrants it. Do not artificially shorten answers to complex questions.
+- For simple/conversational questions, stay concise (1-3 sentences).
+- Structure longer answers with clear markdown: short paragraphs, ## headings when helpful, - bullet lists, numbered steps, **bold** for key terms, and \`inline code\` or fenced code blocks with language tags for code.
+- Use tables when comparing options. Use blockquotes for important callouts.
+- Prefer clarity and correctness over brevity. Show reasoning steps for math/logic when useful.
+
+VOICE:
+- Natural, warm, direct. Never say "as an AI" and never mention internal rules.
+- If the user is speaking (voice mode), keep responses short and free of markdown formatting.
+
+SAFETY:
+- General info only. For medical, legal, or financial specifics, recommend a qualified professional.`;
 
 const MEMORY_EXTRACTION_PROMPT = `Analyze this conversation and extract any long-term useful information about the user.
 
 EXTRACT ONLY:
 - User name (if explicitly mentioned) → key: "user_name"
-- Study interests or subjects → key: "study_interest"  
+- Study interests or subjects → key: "study_interest"
 - Career goals → key: "career_goal"
 - Learning style preferences → key: "learning_style"
 - General wellness focus (non-sensitive) → key: "wellness_focus"
@@ -47,15 +43,10 @@ EXTRACT ONLY:
 - Repeated concerns or topics → key: "recurring_topic"
 
 DO NOT EXTRACT:
-- Medical diagnoses or conditions
-- Medication history
-- Mental health conditions
-- Sensitive personal data
-- Temporary emotions ("I'm sad today")
-- One-time complaints
+- Medical diagnoses, conditions, medications, mental health conditions
+- Sensitive personal data, temporary emotions, one-time complaints
 
-Return a JSON array of objects with: { "type": "preference|goal|challenge|interest|name", "key": "memory_key", "value": "extracted value" }
-If nothing to extract, return an empty array: []
+Return a JSON array: [{ "type": "...", "key": "...", "value": "..." }]. Empty array if nothing.
 
 User message: `;
 
@@ -67,167 +58,193 @@ interface Memory {
 
 async function fetchUserMemories(supabase: any, userId: string): Promise<Memory[]> {
   const { data, error } = await supabase
-    .from('user_memories')
-    .select('memory_type, memory_key, memory_value')
-    .eq('user_id', userId);
-  
-  if (error) {
-    console.error('Error fetching memories:', error);
-    return [];
-  }
+    .from("user_memories")
+    .select("memory_type, memory_key, memory_value")
+    .eq("user_id", userId);
+  if (error) return [];
   return data || [];
 }
 
-async function extractAndSaveMemories(
-  supabase: any,
-  userId: string,
-  userMessage: string,
-  apiKey: string
-): Promise<void> {
+async function extractAndSaveMemories(supabase: any, userId: string, userMessage: string, apiKey: string) {
   try {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "user", content: MEMORY_EXTRACTION_PROMPT + userMessage }
-        ],
+        model: MEMORY_MODEL,
+        messages: [{ role: "user", content: MEMORY_EXTRACTION_PROMPT + userMessage }],
         temperature: 0.1,
       }),
     });
-
     if (!response.ok) return;
-
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "[]";
-    
-    // Parse JSON from response (handle markdown code blocks)
-    let memories: Array<{ type: string; key: string; value: string }> = [];
-    try {
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        memories = JSON.parse(jsonMatch[0]);
-      }
-    } catch {
-      return;
-    }
-
-    // Save each extracted memory
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) return;
+    const memories = JSON.parse(jsonMatch[0]);
     for (const mem of memories) {
       if (mem.key && mem.value) {
-        await supabase
-          .from('user_memories')
-          .upsert({
+        await supabase.from("user_memories").upsert(
+          {
             user_id: userId,
-            memory_type: mem.type || 'preference',
+            memory_type: mem.type || "preference",
             memory_key: mem.key,
             memory_value: mem.value,
-          }, { onConflict: 'user_id,memory_key' });
+          },
+          { onConflict: "user_id,memory_key" },
+        );
       }
     }
-  } catch (error) {
-    console.error('Memory extraction error:', error);
+  } catch (e) {
+    console.error("Memory extraction error:", e);
   }
 }
 
 function buildMemoryContext(memories: Memory[]): string {
   if (memories.length === 0) return "";
-  
-  const memoryLines = memories.map(m => `- ${m.memory_key}: ${m.memory_value}`);
-  return `\n\nUSER CONTEXT (use naturally when relevant, don't explicitly mention "remembering"):\n${memoryLines.join('\n')}`;
+  const lines = memories.map((m) => `- ${m.memory_key}: ${m.memory_value}`);
+  return `\n\nUSER CONTEXT (use naturally when relevant):\n${lines.join("\n")}`;
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+// ---- Web search via Firecrawl gateway ----
+async function webSearch(query: string, apiKey: string, firecrawlKey: string) {
+  const res = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/search", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "X-Connection-Api-Key": firecrawlKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, limit: 5 }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    return { error: `search_failed: ${res.status} ${text.slice(0, 200)}` };
   }
+  const data = await res.json();
+  const results = (data.data || data.web || []).slice(0, 5).map((r: any, i: number) => ({
+    n: i + 1,
+    title: r.title || r.url,
+    url: r.url,
+    snippet: (r.description || r.snippet || "").slice(0, 400),
+  }));
+  return { results };
+}
+
+const TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "web_search",
+      description:
+        "Search the live web for current information, recent news, facts, docs, or anything you are unsure about. Returns titles, URLs, and snippets.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Concise search query" },
+        },
+        required: ["query"],
+      },
+    },
+  },
+];
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { messages, conversationHistory } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
 
-    // Initialize Supabase client
-    const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_SERVICE_ROLE_KEY!
-    );
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Get user ID from auth header
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
     const authHeader = req.headers.get("Authorization");
     let userId: string | null = null;
-    
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
-      // Verify the JWT token using Supabase auth
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      if (authError) {
-        console.error("Auth error:", authError);
-      }
+      const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
-      console.log("User ID from auth:", userId ? userId.slice(0, 8) + "..." : "null");
     }
 
-    // Fetch user memories if authenticated
     let memories: Memory[] = [];
-    if (userId) {
-      memories = await fetchUserMemories(supabase, userId);
-    }
+    if (userId) memories = await fetchUserMemories(supabase, userId);
 
-    // Build context-aware messages with memory
     const systemContent = SYSTEM_PROMPT + buildMemoryContext(memories);
-    const contextMessages = [
-      { role: "system", content: systemContent },
-    ];
+    const contextMessages: any[] = [{ role: "system", content: systemContent }];
 
-    // Add conversation history for context
-    if (conversationHistory && Array.isArray(conversationHistory)) {
-      conversationHistory.forEach((msg: { role: string; content: string }) => {
-        contextMessages.push({
-          role: msg.role,
-          content: msg.content,
-        });
-      });
+    if (Array.isArray(conversationHistory)) {
+      for (const m of conversationHistory) contextMessages.push({ role: m.role, content: m.content });
     }
-
-    // Add current messages
     let latestUserMessage = "";
-    if (messages && Array.isArray(messages)) {
-      messages.forEach((msg: { role: string; content: string }) => {
-        contextMessages.push({
-          role: msg.role,
-          content: msg.content,
-        });
-        if (msg.role === "user") {
-          latestUserMessage = msg.content;
-        }
-      });
+    if (Array.isArray(messages)) {
+      for (const m of messages) {
+        contextMessages.push({ role: m.role, content: m.content });
+        if (m.role === "user") latestUserMessage = m.content;
+      }
     }
 
-    // Extract and save memories in background (don't await)
     if (userId && latestUserMessage) {
       extractAndSaveMemories(supabase, userId, latestUserMessage, LOVABLE_API_KEY);
     }
 
-    console.log("Sending request to AI gateway with", contextMessages.length, "messages");
+    // ---- Tool-calling loop (non-streaming) ----
+    const enableTools = !!FIRECRAWL_API_KEY;
+    const MAX_TOOL_ROUNDS = 3;
 
+    for (let round = 0; round < MAX_TOOL_ROUNDS && enableTools; round++) {
+      const toolRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: CHAT_MODEL,
+          messages: contextMessages,
+          tools: TOOLS,
+          tool_choice: "auto",
+        }),
+      });
+      if (!toolRes.ok) {
+        const errText = await toolRes.text();
+        console.error("Tool phase error:", toolRes.status, errText);
+        break; // fall through to streaming final call without tools
+      }
+      const toolData = await toolRes.json();
+      const msg = toolData.choices?.[0]?.message;
+      if (!msg) break;
+      const toolCalls = msg.tool_calls || [];
+      if (toolCalls.length === 0) {
+        // No tool call — we still want a streamed answer for UX, so break and stream a final call.
+        break;
+      }
+      contextMessages.push({ role: "assistant", content: msg.content || "", tool_calls: toolCalls });
+      for (const tc of toolCalls) {
+        let result: any = { error: "unknown_tool" };
+        try {
+          const args = JSON.parse(tc.function?.arguments || "{}");
+          if (tc.function?.name === "web_search") {
+            result = await webSearch(args.query || "", LOVABLE_API_KEY, FIRECRAWL_API_KEY!);
+          }
+        } catch (e) {
+          result = { error: String(e) };
+        }
+        contextMessages.push({
+          role: "tool",
+          tool_call_id: tc.id,
+          content: JSON.stringify(result),
+        });
+      }
+    }
+
+    // ---- Final streamed response ----
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: CHAT_MODEL,
         messages: contextMessages,
         stream: true,
       }),
@@ -236,24 +253,21 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
-      
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "I'm receiving many requests right now. Please wait a moment and try again." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      
       return new Response(
         JSON.stringify({ error: "I'm having trouble connecting right now. Please try again." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -264,7 +278,7 @@ serve(async (req) => {
     console.error("Chat function error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "An unexpected error occurred" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

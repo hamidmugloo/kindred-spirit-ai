@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 import { User, Heart, Bot, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MemoizedChatMessageProps {
   role: 'user' | 'assistant';
@@ -82,10 +84,19 @@ const MemoizedChatMessage = memo<MemoizedChatMessageProps>(({
             )}
           </div>
 
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-            {content}
-            {!content && isLatest && <TypingIndicator />}
-          </p>
+          {isUser ? (
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {content}
+            </p>
+          ) : (
+            <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-pre:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-a:text-primary prose-li:my-0.5">
+              {content ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+              ) : (
+                isLatest && <TypingIndicator />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
