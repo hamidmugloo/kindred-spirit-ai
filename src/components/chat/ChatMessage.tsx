@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { User, Sparkles, Heart, Bot, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
@@ -125,28 +127,25 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </div>
 
-          <p className="text-sm leading-relaxed whitespace-pre-wrap relative z-10">
-            {content}
-            {!content && isLatest && (
-              <span className="inline-flex gap-2 items-center ml-1">
-                <motion.span 
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
-                  className="w-2 h-2 rounded-full bg-gradient-to-br from-sage to-sage/60" 
-                />
-                <motion.span 
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }}
-                  className="w-2 h-2 rounded-full bg-gradient-to-br from-lavender to-lavender/60" 
-                />
-                <motion.span 
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }}
-                  className="w-2 h-2 rounded-full bg-gradient-to-br from-calm-blue to-calm-blue/60" 
-                />
-              </span>
-            )}
-          </p>
+          {isUser ? (
+            <p className="text-sm leading-relaxed whitespace-pre-wrap relative z-10">
+              {content}
+            </p>
+          ) : (
+            <div className="text-sm leading-relaxed relative z-10 prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-pre:my-2 prose-pre:bg-muted prose-pre:text-foreground prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-a:text-primary prose-li:my-0.5">
+              {content ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+              ) : (
+                isLatest && (
+                  <span className="inline-flex gap-2 items-center ml-1">
+                    <motion.span animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity, delay: 0 }} className="w-2 h-2 rounded-full bg-gradient-to-br from-sage to-sage/60" />
+                    <motion.span animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }} className="w-2 h-2 rounded-full bg-gradient-to-br from-lavender to-lavender/60" />
+                    <motion.span animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 0.8, repeat: Infinity, delay: 0.4 }} className="w-2 h-2 rounded-full bg-gradient-to-br from-calm-blue to-calm-blue/60" />
+                  </span>
+                )
+              )}
+            </div>
+          )}
 
           {/* Copy button for assistant messages */}
           {!isUser && content && (
