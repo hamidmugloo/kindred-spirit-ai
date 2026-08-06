@@ -88,7 +88,9 @@ export default function Auth() {
       if (isSignUp) {
         const { error } = await signUp(email, password, displayName);
         if (error) {
-          if (error.message.includes('already registered')) {
+          if (isNetworkError(error)) {
+            toast.error(NETWORK_ERROR_MESSAGE);
+          } else if (error.message.includes('already registered')) {
             toast.error('This email is already registered. Try signing in instead.');
           } else {
             toast.error(error.message);
@@ -100,7 +102,9 @@ export default function Auth() {
       } else {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
+          if (isNetworkError(error)) {
+            toast.error(NETWORK_ERROR_MESSAGE);
+          } else if (error.message.includes('Invalid login credentials')) {
             toast.error('Invalid email or password. Please try again.');
           } else {
             toast.error(error.message);
@@ -110,6 +114,8 @@ export default function Auth() {
         toast.success('Welcome back! Good to see you again.');
         navigate('/chat');
       }
+    } catch (err) {
+      toast.error(isNetworkError(err) ? NETWORK_ERROR_MESSAGE : 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
