@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { toFriendlyAuthError } from '@/lib/authErrors';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Please enter a valid email address');
@@ -45,13 +46,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(toFriendlyAuthError(error).message);
         return;
       }
 
       setIsSuccess(true);
     } catch (err) {
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error(toFriendlyAuthError(err).message);
     } finally {
       setIsLoading(false);
     }
