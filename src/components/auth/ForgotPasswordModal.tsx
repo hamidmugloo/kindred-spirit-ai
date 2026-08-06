@@ -45,13 +45,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
       });
 
       if (error) {
-        toast.error(error.message);
+        toast.error(toFriendlyAuthError(error).message);
         return;
       }
 
       setIsSuccess(true);
     } catch (err) {
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error(toFriendlyAuthError(err).message);
     } finally {
       setIsLoading(false);
     }
