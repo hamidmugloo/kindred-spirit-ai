@@ -40,32 +40,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, displayName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          display_name: displayName,
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: displayName,
+          },
         },
-      },
-    });
-    
-    return { error: error as Error | null };
+      });
+
+      return { error: error ? toFriendlyAuthError(error) : null };
+    } catch (err) {
+      return { error: toFriendlyAuthError(err) };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    return { error: error as Error | null };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      return { error: error ? toFriendlyAuthError(error) : null };
+    } catch (err) {
+      return { error: toFriendlyAuthError(err) };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Clearing local state is enough if the server is unreachable.
+    }
+    setSession(null);
+    setUser(null);
   };
 
   return (
