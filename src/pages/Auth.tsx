@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { isNetworkError, NETWORK_ERROR_MESSAGE } from '@/lib/authErrors';
 import { z } from 'zod';
 import orbitLogo from '@/assets/orbit-logo.png';
 import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
