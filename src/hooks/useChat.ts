@@ -97,8 +97,8 @@ export const useChat = () => {
     return data.id;
   };
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!user || isLoading) return;
+  const sendMessage = useCallback(async (content: string): Promise<boolean> => {
+    if (!user || isLoading) return false;
     
     setIsLoading(true);
     
@@ -108,7 +108,7 @@ export const useChat = () => {
       if (!conversationId) {
         setIsLoading(false);
         toast.error('Failed to start conversation');
-        return;
+        return false;
       }
     }
     
@@ -225,11 +225,13 @@ export const useChat = () => {
             .eq('id', conversationId);
         }
       }
+      return Boolean(assistantContent);
     } catch (error) {
       console.error('Chat error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to send message');
       // Remove the empty assistant message on error
       setMessages((prev) => prev.filter((msg) => msg.content !== ''));
+      return false;
     } finally {
       setIsLoading(false);
     }

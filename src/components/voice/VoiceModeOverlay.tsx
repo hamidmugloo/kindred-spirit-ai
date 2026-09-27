@@ -8,6 +8,9 @@ interface VoiceModeOverlayProps {
   onClose: () => void;
   isListening: boolean;
   isSpeaking: boolean;
+  isProcessing?: boolean;
+  voiceStatus?: 'idle' | 'listening' | 'processing' | 'speaking' | 'error';
+  error?: string | null;
   liveTranscript: string;
   inputLevel: number;
   outputLevel: number;
@@ -22,6 +25,9 @@ export const VoiceModeOverlay: React.FC<VoiceModeOverlayProps> = ({
   onClose,
   isListening,
   isSpeaking,
+  isProcessing = false,
+  voiceStatus = 'idle',
+  error,
   liveTranscript,
   inputLevel,
   outputLevel,
@@ -137,7 +143,15 @@ export const VoiceModeOverlay: React.FC<VoiceModeOverlayProps> = ({
 
   if (!open) return null;
 
-  const status = isSpeaking ? 'Speaking…' : isListening ? 'Listening…' : 'Tap the mic to talk';
+  const status = isSpeaking
+    ? 'Speaking…'
+    : isListening
+      ? 'Listening…'
+      : isProcessing
+        ? 'Thinking…'
+        : voiceStatus === 'error'
+          ? 'Voice input needs attention'
+          : 'Tap the mic to talk';
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-xl flex flex-col">
@@ -159,10 +173,13 @@ export const VoiceModeOverlay: React.FC<VoiceModeOverlayProps> = ({
         <div className="text-center min-h-[2rem]">
           <p className={cn(
             "text-sm font-medium transition-colors",
-            isSpeaking ? "text-primary" : isListening ? "text-sage" : "text-muted-foreground"
+            isSpeaking ? "text-primary" : isListening ? "text-sage" : isProcessing ? "text-calm-blue" : voiceStatus === 'error' ? "text-destructive" : "text-muted-foreground"
           )}>
             {status}
           </p>
+          {error && voiceStatus === 'error' && (
+            <p className="mt-2 max-w-sm text-xs leading-relaxed text-destructive/80">{error}</p>
+          )}
         </div>
 
         {/* Live transcript */}
@@ -193,11 +210,14 @@ export const VoiceModeOverlay: React.FC<VoiceModeOverlayProps> = ({
         <Button
           size="lg"
           onClick={isListening ? onStopListening : onStartListening}
+          disabled={isProcessing || isSpeaking}
           className={cn(
             "h-20 w-20 rounded-full transition-all shadow-lg",
-            isListening
+             isListening
               ? "bg-destructive hover:bg-destructive/90 scale-110"
-              : "bg-primary hover:bg-primary/90"
+               : isProcessing || isSpeaking
+                 ? "bg-muted text-muted-foreground"
+                 : "bg-primary hover:bg-primary/90"
           )}
           aria-label={isListening ? 'Stop listening' : 'Start listening'}
         >

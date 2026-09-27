@@ -74,6 +74,7 @@ export const useVoiceConversation = () => {
   const startingRef = useRef(false); // guards rapid double-taps
   const finalTranscriptRef = useRef('');
   const onFinalRef = useRef<((text: string) => void) | null>(null);
+  const finishedRef = useRef(false);
   const silenceTimerRef = useRef<number | null>(null);
   const maxTimerRef = useRef<number | null>(null);
   const unmountedRef = useRef(false);
@@ -264,6 +265,7 @@ export const useVoiceConversation = () => {
       setLiveTranscript('');
       finalTranscriptRef.current = '';
       onFinalRef.current = onFinal ?? null;
+      finishedRef.current = false;
 
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       let recognition: SpeechRecognition;
@@ -283,6 +285,8 @@ export const useVoiceConversation = () => {
       recognition.lang = navigator.language || 'en-US';
 
       const finish = (deliver: boolean) => {
+        if (finishedRef.current) return;
+        finishedRef.current = true;
         clearTimers();
         const cb = onFinalRef.current;
         const text = finalTranscriptRef.current.trim();

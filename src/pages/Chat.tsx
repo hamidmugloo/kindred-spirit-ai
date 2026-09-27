@@ -42,7 +42,12 @@ export default function Chat() {
     stopListening,
     speak,
     stopSpeaking,
-    toggleVoiceMode,
+    enableVoiceMode,
+    disableVoiceMode,
+    status: voiceStatus,
+    error: voiceError,
+    isProcessing: isVoiceProcessing,
+    setIdle,
     markInputAsText,
   } = useVoiceConversation();
 
@@ -129,6 +134,11 @@ export default function Chat() {
   const handleStarterClick = (starter: string) => {
     sendMessage(starter);
   };
+
+  const handleVoiceTranscript = useCallback(async (transcript: string) => {
+    const sent = await sendMessage(transcript);
+    if (!sent) setIdle();
+  }, [sendMessage, setIdle]);
 
   const handleSelectConversation = async (conversationId: string) => {
     const selected = conversations.find((c) => c.id === conversationId);
@@ -305,11 +315,16 @@ export default function Chat() {
               }
               isVoiceSupported={isVoiceSupported}
               isListening={isListening}
-              onStartListening={startListening}
+               onStartListening={(onTranscript) => {
+                 void startListening((text) => {
+                   onTranscript(text);
+                   void handleVoiceTranscript(text);
+                 });
+               }}
               onStopListening={stopListening}
               voiceModeEnabled={voiceModeEnabled}
               onToggleVoiceMode={() => {
-                if (!voiceModeEnabled) toggleVoiceMode();
+                 if (!voiceModeEnabled) enableVoiceMode();
                 setVoiceOverlayOpen(true);
               }}
               isSpeaking={isSpeaking}
@@ -324,11 +339,15 @@ export default function Chat() {
         open={voiceOverlayOpen}
         onClose={() => {
           setVoiceOverlayOpen(false);
+          disableVoiceMode();
           stopListening();
           stopSpeaking();
         }}
         isListening={isListening}
         isSpeaking={isSpeaking}
+        isProcessing={isVoiceProcessing}
+        voiceStatus={voiceStatus}
+        error={voiceError}
         liveTranscript={liveTranscript}
         inputLevel={inputLevel}
         outputLevel={outputLevel}
@@ -338,14 +357,9 @@ export default function Chat() {
             : undefined
         }
         onStartListening={() => {
-          let finalText = '';
-          startListening(
-            (text) => { finalText = text; },
-            () => {
-              const trimmed = finalText.trim();
-              if (trimmed) sendMessage(trimmed);
-            }
-          );
+           void startListening((text) => {
+             void handleVoiceTranscript(text);
+           });
         }}
         onStopListening={stopListening}
         onStopSpeaking={stopSpeaking}
