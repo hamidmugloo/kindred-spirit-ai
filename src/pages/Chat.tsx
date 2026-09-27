@@ -324,8 +324,15 @@ export default function Chat() {
               onStopListening={stopListening}
               voiceModeEnabled={voiceModeEnabled}
               onToggleVoiceMode={() => {
-                 if (!voiceModeEnabled) enableVoiceMode();
-                setVoiceOverlayOpen(true);
+                 if (voiceModeEnabled) {
+                   disableVoiceMode();
+                   setVoiceOverlayOpen(false);
+                   stopListening();
+                   stopSpeaking();
+                 } else {
+                   enableVoiceMode();
+                   setVoiceOverlayOpen(true);
+                 }
               }}
               isSpeaking={isSpeaking}
               onStopSpeaking={stopSpeaking}

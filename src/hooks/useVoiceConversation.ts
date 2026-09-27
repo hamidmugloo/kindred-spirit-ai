@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 /**
  * Unified voice conversation engine for ORBIT.
@@ -86,6 +87,7 @@ export const useVoiceConversation = () => {
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const speakTokenRef = useRef(0);
+  const fallbackNotifiedRef = useRef(false);
 
   const safeSet = useCallback(<T,>(setter: (v: T) => void, value: T) => {
     if (!unmountedRef.current) setter(value);
@@ -478,6 +480,13 @@ export const useVoiceConversation = () => {
           return;
         }
         // Graceful fallback: browser voice.
+        if (!fallbackNotifiedRef.current) {
+          fallbackNotifiedRef.current = true;
+          toast.info('Using browser voice', {
+            description: 'Premium voice is unavailable right now, so ORBIT is using your browser voice instead.',
+            duration: 7000,
+          });
+        }
         await speakBrowser(text, token);
         finishSpeak();
       }
