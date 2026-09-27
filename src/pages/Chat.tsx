@@ -327,6 +327,7 @@ export default function Chat() {
                  if (voiceModeEnabled) {
                    disableVoiceMode();
                    setVoiceOverlayOpen(false);
+                   markInputAsText();
                    stopListening();
                    stopSpeaking();
                  } else {
