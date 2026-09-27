@@ -281,7 +281,6 @@ export const useVoiceConversation = () => {
       // Mobile engines are unreliable with continuous mode.
       recognition.continuous = !isMobileUA();
       recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
       recognition.lang = navigator.language || 'en-US';
 
       const finish = (deliver: boolean) => {
@@ -546,6 +545,7 @@ export const useVoiceConversation = () => {
     voiceModeEnabled,
     lastInputWasVoice,
     isSupported,
+    isVoiceSupported: isSupported,
     isTTSSupported,
     // actions
     startListening,

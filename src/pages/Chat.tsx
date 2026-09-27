@@ -94,7 +94,7 @@ export default function Chat() {
        lastMessage.content !== lastMessageRef.current
      ) {
        lastMessageRef.current = lastMessage.content;
-       speak(lastMessage.content, true); // Force speak
+        void speak(lastMessage.content);
      }
    }, [messages, voiceModeEnabled, voiceOverlayOpen, lastInputWasVoice, isLoading, speak]);
 
