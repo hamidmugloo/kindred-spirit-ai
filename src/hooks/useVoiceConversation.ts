@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 /**
  * Unified voice conversation engine for ORBIT.
@@ -74,6 +75,7 @@ export const useVoiceConversation = () => {
   const startingRef = useRef(false); // guards rapid double-taps
   const finalTranscriptRef = useRef('');
   const onFinalRef = useRef<((text: string) => void) | null>(null);
+  const finishedRef = useRef(false);
   const silenceTimerRef = useRef<number | null>(null);
   const maxTimerRef = useRef<number | null>(null);
   const unmountedRef = useRef(false);
@@ -85,6 +87,7 @@ export const useVoiceConversation = () => {
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const speakTokenRef = useRef(0);
+  const fallbackNotifiedRef = useRef(false);
 
   const safeSet = useCallback(<T,>(setter: (v: T) => void, value: T) => {
     if (!unmountedRef.current) setter(value);
@@ -264,6 +267,7 @@ export const useVoiceConversation = () => {
       setLiveTranscript('');
       finalTranscriptRef.current = '';
       onFinalRef.current = onFinal ?? null;
+      finishedRef.current = false;
 
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       let recognition: SpeechRecognition;
@@ -279,10 +283,11 @@ export const useVoiceConversation = () => {
       // Mobile engines are unreliable with continuous mode.
       recognition.continuous = !isMobileUA();
       recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
       recognition.lang = navigator.language || 'en-US';
 
       const finish = (deliver: boolean) => {
+        if (finishedRef.current) return;
+        finishedRef.current = true;
         clearTimers();
         const cb = onFinalRef.current;
         const text = finalTranscriptRef.current.trim();
@@ -475,6 +480,13 @@ export const useVoiceConversation = () => {
           return;
         }
         // Graceful fallback: browser voice.
+        if (!fallbackNotifiedRef.current) {
+          fallbackNotifiedRef.current = true;
+          toast.info('Using browser voice', {
+            description: 'Premium voice is unavailable right now, so ORBIT is using your browser voice instead.',
+            duration: 7000,
+          });
+        }
         await speakBrowser(text, token);
         finishSpeak();
       }
@@ -542,6 +554,7 @@ export const useVoiceConversation = () => {
     voiceModeEnabled,
     lastInputWasVoice,
     isSupported,
+    isVoiceSupported: isSupported,
     isTTSSupported,
     // actions
     startListening,
